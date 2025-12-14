@@ -11,7 +11,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { adminDb } from "@/config/firebase";
 import { JWTService } from "@/services/jwt.service";
-import _, {isUndefined} from "lodash";
+import _ from "lodash";
 import { config } from "@/config/env";
 import {
   fetchDocuments,
@@ -27,7 +27,7 @@ const generateToken = (userId: string, userRole: ERole) => {
 };
 
 const checkIsUserExist = async (userId: string) => {
-  if (isUndefined(userId)) return false;
+  if (_.isUndefined(userId)) return false;
 
   const userDoc = await adminDb.collection("users").doc(userId).get();
   return userDoc.exists;
@@ -35,7 +35,7 @@ const checkIsUserExist = async (userId: string) => {
 
 const settingCreation = async (userId: string) => {
   const isUserExist = await checkIsUserExist(userId)
-  if (isUndefined(isUserExist)) return;
+  if (_.isUndefined(isUserExist)) return;
 
   const userSettings: IUserSetting = {
     userId,
@@ -57,7 +57,7 @@ const settingCreation = async (userId: string) => {
 
 const blacklistCreation = async (userId: string) => {
   const isUserExist = await checkIsUserExist(userId)
-  if (isUndefined(isUserExist)) return;
+  if (_.isUndefined(isUserExist)) return;
 
   const userBlacklist: IBlacklist = {
     userId,
