@@ -1,0 +1,25 @@
+meta {
+  name: Today location
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{BACKEND_URL}}/api/location/
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "coordinate": {
+      "latitude": 12,
+      "longitude": 12
+    }
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

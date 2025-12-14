@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: journee-backend
+    env: node
+    buildCommand: yarn install
+    startCommand: yarn start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        fromService: true

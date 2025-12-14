@@ -1,0 +1,33 @@
+meta {
+  name: Update entry
+  type: http
+  seq: 2
+}
+
+patch {
+  url: {{BACKEND_URL}}/api/journals/QpKkhAO9xP8EcjeTWiii/entry/f3cpoReBZohOnvDH7vDT
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "location": {
+        "place": "123 Dong Den",
+        "street": "123 Dong Den",
+        "city": "Ho Chi Minh",
+        "region": "Asia",
+        "country": "Viet Nam",
+        "value": "123 Dong Den, Ho Chi Minh, Viet Nam",
+        "coordinate": {
+          "latitude": 24.023,
+          "longitude": 23.21312
+        }
+      }
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

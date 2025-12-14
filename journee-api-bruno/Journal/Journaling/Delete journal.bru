@@ -1,0 +1,16 @@
+meta {
+  name: Delete journal
+  type: http
+  seq: 1
+}
+
+delete {
+  url: {{BACKEND_URL}}/api/journals/jA842hZtx557xlAVesgm
+  body: json
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

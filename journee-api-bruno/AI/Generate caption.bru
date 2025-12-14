@@ -1,0 +1,22 @@
+meta {
+  name: Generate caption
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{AI_URL_DEV}}/api/captions/generate
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "description": "Hà Nội, phổ cổ"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

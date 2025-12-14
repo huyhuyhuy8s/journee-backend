@@ -1,0 +1,16 @@
+meta {
+  name: Get current user
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{BACKEND_URL}}/api/users/me
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

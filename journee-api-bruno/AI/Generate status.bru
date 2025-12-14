@@ -1,0 +1,22 @@
+meta {
+  name: Generate status
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{AI_URL_DEV}}/api/status/generate
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "description": "Hồ Chí Minh"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

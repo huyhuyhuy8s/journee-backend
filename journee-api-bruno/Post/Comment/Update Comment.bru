@@ -1,0 +1,22 @@
+meta {
+  name: Update Comment
+  type: http
+  seq: 2
+}
+
+patch {
+  url: {{BACKEND_URL}}/api/posts/Ii3Avee1k308xNFfv8x7/comment/Go2cNc6yXUxDpb6BCAWy
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "content": "NOOOOOOOOOOOO, what a great post 2"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

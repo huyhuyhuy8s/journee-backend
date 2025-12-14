@@ -1,0 +1,23 @@
+meta {
+  name: Update entry times
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{BACKEND_URL}}/api/journals/QpKkhAO9xP8EcjeTWiii/entry/f3cpoReBZohOnvDH7vDT/times
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "arrivalTime": "2025-12-05T17:00:10.624Z",
+    "departureTime": "2025-12-05T17:00:10.624Z"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

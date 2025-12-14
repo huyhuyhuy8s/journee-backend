@@ -1,0 +1,22 @@
+meta {
+  name: Update post
+  type: http
+  seq: 1
+}
+
+patch {
+  url: {{BACKEND_URL}}/api/posts/pEjRWwX93xKYLPxQni4S
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "caption": "Hello post from world"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

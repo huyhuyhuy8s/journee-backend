@@ -1,0 +1,22 @@
+meta {
+  name: Update react
+  type: http
+  seq: 1
+}
+
+patch {
+  url: {{BACKEND_URL}}/api/posts/nRe5zUwLCSkOROLK4Z8P/react
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "reactionType": "Haha"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

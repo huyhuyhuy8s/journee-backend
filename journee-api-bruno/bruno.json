@@ -1,0 +1,15 @@
+{
+  "version": "1",
+  "name": "journee-api-bruno",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ],
+  "size": 0.0021724700927734375,
+  "filesCount": 11,
+  "presets": {
+    "requestType": "http",
+    "requestUrl": "{{BACKEND_URL}}/api/"
+  }
+}

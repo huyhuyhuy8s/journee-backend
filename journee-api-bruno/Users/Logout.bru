@@ -1,0 +1,15 @@
+meta {
+  name: Logout
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{BACKEND_URL}}/api/users/logout
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}

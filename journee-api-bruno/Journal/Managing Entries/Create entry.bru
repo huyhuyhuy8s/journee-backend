@@ -1,0 +1,39 @@
+meta {
+  name: Create entry
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{BACKEND_URL}}/api/journals/QpKkhAO9xP8EcjeTWiii/entry
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "name": "Quang home",
+      "location": {
+        "place": "123 Dong Den",
+        "street": "123 Dong Den",
+        "city": "Ho Chi Minh",
+        "region": "Asia",
+        "country": "Viet Nam",
+        "value": "123 Dong Den, Ho Chi Minh, Viet Nam",
+        "coordinate": {
+          "latitude": 12.023,
+          "longitude": 23.21312
+        }
+      },
+      "image": [
+          "http://localhost:3001",
+          "http://localhost:3000"
+      ],
+      "thought": "wow"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

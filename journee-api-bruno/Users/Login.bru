@@ -1,0 +1,23 @@
+meta {
+  name: Login
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{BACKEND_URL}}/api/users/login
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "email": "usertest01@mail.com",
+    "password": "usertest01"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

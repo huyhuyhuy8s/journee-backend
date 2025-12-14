@@ -1,0 +1,22 @@
+meta {
+  name: Add Comment
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{BACKEND_URL}}/api/posts/Ii3Avee1k308xNFfv8x7/comment
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "content": "Wow, what a great post 2"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

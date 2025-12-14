@@ -1,0 +1,23 @@
+meta {
+  name: Create post
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{BACKEND_URL}}/api/posts/
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "caption": "Hello post",
+      "image": ["https://m.media-amazon.com/images/M/MV5BOTUxOTg3ODktNzY5MC00Mzk5LWIwZGYtZjZmODkwMjQ3YzEyXkEyXkFqcGc@._V1_.jpg"]
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
