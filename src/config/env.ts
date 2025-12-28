@@ -16,7 +16,6 @@ interface EnvConfig {
   FIRESTORE_CLIENT_AUTH_DOMAIN: string;
   FIRESTORE_CLIENT_PROJECT_ID: string;
   FIRESTORE_CLIENT_STORAGE_BUCKET: string;
-  w
   FIRESTORE_CLIENT_MESSAGING_SENDER_ID: string;
   FIRESTORE_CLIENT_APP_ID: string;
   FIRESTORE_CLIENT_MEASUREMENT_ID: string;
@@ -47,7 +46,7 @@ interface EnvConfig {
 const getEnvVar = (key: string, defaultValue?: string): string => {
   const value = process.env[key];
   if (!value && !defaultValue) {
-    throw new Error(`Missing required environment variable: ${key}`);
+    throw new Error(`Missing  required environment variable: ${key}`);
   }
   return value || defaultValue!;
 };

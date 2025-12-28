@@ -1,6 +1,7 @@
 # Journee Backend
 
-A robust Node.js backend API for the Journee application - a social journaling platform that allows users to share their daily experiences, thoughts, and memories.
+A robust Node.js backend API for the Journee application - a social journaling platform that allows users to share their
+daily experiences, thoughts, and memories.
 
 ## 🚀 Features
 
@@ -31,11 +32,13 @@ cd journee-backend
 ### 2. Install Dependencies
 
 Using yarn (recommended):
+
 ```bash
 yarn install
 ```
 
 Using npm:
+
 ```bash
 npm install
 ```
@@ -82,17 +85,18 @@ FRONTEND_URL=http://localhost:8081
 2. Create a new project or select existing one
 3. Enable **Firestore Database**
 4. Generate a **Service Account Key**:
-   - Go to Project Settings → Service Accounts
-   - Generate new private key
-   - Download the JSON file
+    - Go to Project SettingComponents → Service Accounts
+    - Generate new private key
+    - Download the JSON file
 5. Get **Web App Configuration**:
-   - Go to Project Settings → General
-   - Add a web app if you don't have one
-   - Copy the config object values
+    - Go to Project SettingComponents → General
+    - Add a web app if you don't have one
+    - Copy the config object values
 
 ## 🏃 Running the Application
 
 ### Development Mode
+
 ```bash
 yarn dev
 # or
@@ -100,6 +104,7 @@ npm run dev
 ```
 
 ### Production Mode
+
 ```bash
 yarn start
 # or
@@ -135,6 +140,7 @@ journee-backend/
 ## 🔌 API Endpoints
 
 ### Authentication
+
 - `POST /api/users/` - User registration
 - `POST /api/users/login` - User login
 - `POST /api/users/logout` - User logout
@@ -142,10 +148,12 @@ journee-backend/
 - `PUT /api/users/profile` - Update user profile (protected)
 
 ### Users
+
 - `GET /api/users` - Get all users
 - `GET /api/users/:id` - Get user by ID
 
 ### Posts
+
 - `GET /api/posts` - Get all posts with reactions and comments
 - `GET /api/posts/:id` - Get specific post with reactions and comments
 - `POST /api/posts` - Create new post (protected)
@@ -156,6 +164,7 @@ journee-backend/
 - `POST /api/posts/:id/comment` - Comment on post (protected)
 
 ### Journals
+
 - `GET /api/journals` - Get all journals (protected)
 - `GET /api/journals/:id` - Get specific journal (protected)
 - `POST /api/journals` - Create journal entry (protected)
@@ -163,6 +172,7 @@ journee-backend/
 - `DELETE /api/journals/:id` - Delete journal entry (protected)
 
 ### Health Check
+
 - `GET /health` - Server health status
 - `GET /` - API information
 
@@ -177,6 +187,7 @@ journee-backend/
 ## 📊 Logging
 
 The application automatically logs:
+
 - All HTTP requests/responses (`logs/access-YYYY-MM-DD.log`)
 - Authentication events (`logs/auth-YYYY-MM-DD.log`)
 - Errors (`logs/error-YYYY-MM-DD.log`)
@@ -201,6 +212,7 @@ Your API will be available at: `https://your-app-name.onrender.com`
 ### Other Platforms
 
 The application is compatible with:
+
 - **Heroku**
 - **Railway**
 - **DigitalOcean App Platform**
@@ -232,25 +244,27 @@ npm run lint
 ### Database Operations
 
 Use Firebase Client SDK for standard operations:
+
 ```javascript
-const { db } = require('@/config/firebase');
-const { collection, addDoc, getDocs } = require('firebase/firestore');
+const {db} = require('@/config/firebase');
+const {collection, addDoc, getDocs} = require('firebase/firestore');
 
 // Example CRUD operation
 const createDocument = async (data) => {
-  const docRef = await addDoc(collection(db, 'collection-name'), data);
-  return docRef.id;
+    const docRef = await addDoc(collection(db, 'collection-name'), data);
+    return docRef.id;
 };
 ```
 
 Use Firebase Admin SDK for admin operations:
+
 ```javascript
-const { adminDb, admin } = require('@/config/firebase');
+const {adminDb, admin} = require('@/config/firebase');
 
 // Example admin operation
 const verifyToken = async (token) => {
-  const decodedToken = await admin.auth().verifyIdToken(token);
-  return decodedToken;
+    const decodedToken = await admin.auth().verifyIdToken(token);
+    return decodedToken;
 };
 ```
 
@@ -264,7 +278,7 @@ const verifyToken = async (token) => {
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE]() file for details.
 
 ## 🆘 Support
 
