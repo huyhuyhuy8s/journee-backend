@@ -1,14 +1,15 @@
-import { adminDb } from "@/config/firebase";
-import { IJournal } from "@/types/global";
-import { Timestamp } from "firebase-admin/firestore";
-import { DateHelper } from "@/utils/date.helper";
+import {adminDb} from "@/config/firebase";
+import {IJournal} from "@/types/global";
+import {Timestamp} from "firebase-admin/firestore";
+import {DateHelper} from "@/utils/date.helper";
 import {
   fetchDocument,
   FetchDocumentResult,
   fetchDocumentsWithQuery,
   fetchDocumentWithRelation,
 } from "@/utils/firestore.helper";
-import { Response } from "express";
+import {Response} from "express";
+import {config} from "@/config/env";
 
 export const JournalService = {
   getTodayJournal: async (
@@ -17,21 +18,30 @@ export const JournalService = {
     const startOfDay = Timestamp.fromDate(DateHelper.getStartOfDay());
     const endOfDay = Timestamp.fromDate(DateHelper.getEndOfDay());
 
+    console.log('getTodayJournal - userId:', userId);
+    console.log('getTodayJournal - startOfDay:', startOfDay.toDate());
+    console.log('getTodayJournal - endOfDay:', endOfDay.toDate());
+
+    console.log('adminDb', config.FIRESTORE_ADMIN_PRIVATE_KEY, '....A**@(!UIJE@!)NE!@IEN)!@IJE)!@E)I!@JEI!@JE)@!JE)!J@EAKKCASCNAKSC............')
+
     try {
       const result = await fetchDocumentsWithQuery<IJournal>("journals", [
-        { field: "userId", operator: "==", value: userId },
-        { field: "createdAt", operator: ">=", value: startOfDay },
-        { field: "createdAt", operator: "<=", value: endOfDay },
+        {field: "userId", operator: "==", value: userId},
+        {field: "createdAt", operator: ">=", value: startOfDay},
+        {field: "createdAt", operator: "<=", value: endOfDay},
       ]);
 
+      console.log('getTodayJournal - result:', JSON.stringify(result, null, 2));
+
       if (!result.success || !result.parents || result.parents.length === 0) {
-        return { success: false };
+        return {success: false};
       }
 
-      return { success: true, data: result.parents[0] };
+      return {success: true, data: result.parents[0]};
     } catch (error) {
       console.error("Error getting today's journal:", error);
-      return { success: false };
+      console.error("Error stack:", error instanceof Error ? error.stack : 'No stack');
+      return {success: false};
     }
   },
 
@@ -42,7 +52,7 @@ export const JournalService = {
     try {
       const result = await fetchDocumentsWithQuery<IJournal>(
         "journals",
-        [{ field: "userId", operator: "==", value: userId }],
+        [{field: "userId", operator: "==", value: userId}],
         undefined,
         undefined,
         res,
@@ -50,7 +60,7 @@ export const JournalService = {
       );
 
       if (!result.success) {
-        return { success: false };
+        return {success: false};
       }
 
       const sortedJournals = (result.parents || []).sort((a, b) => {
@@ -59,7 +69,7 @@ export const JournalService = {
         return bTime - aTime;
       });
 
-      return { success: true, data: sortedJournals };
+      return {success: true, data: sortedJournals};
     } catch (error) {
       console.error("Error fetching user journals:", error);
       res.apiError({
@@ -67,7 +77,7 @@ export const JournalService = {
         message: "Failed to fetch journals",
         error: String(error),
       });
-      return { success: false };
+      return {success: false};
     }
   },
 
@@ -84,10 +94,10 @@ export const JournalService = {
       );
 
       if (!result.success || !result.data) {
-        return { success: false };
+        return {success: false};
       }
 
-      return { success: true, data: { ...result.data, id: journalId } };
+      return {success: true, data: {...result.data, id: journalId}};
     } catch (error) {
       console.error("Error getting journal by ID:", error);
       res.apiError({
@@ -95,7 +105,7 @@ export const JournalService = {
         message: "Failed to fetch journal",
         error: String(error),
       });
-      return { success: false };
+      return {success: false};
     }
   },
 
@@ -172,7 +182,7 @@ export const JournalService = {
       );
 
       if (!result.success || !result.parent) {
-        return { success: false };
+        return {success: false};
       }
 
       return {
@@ -185,7 +195,7 @@ export const JournalService = {
       };
     } catch (error) {
       console.error("Error getting journal with entries:", error);
-      return { success: false };
+      return {success: false};
     }
   },
 };
