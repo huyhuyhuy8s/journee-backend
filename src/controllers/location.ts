@@ -1,10 +1,10 @@
-import { Request, Response } from "express";
-import { GeoPoint } from "@google-cloud/firestore";
-import { JournalService } from "@/services/journal.service";
-import { EntryService } from "@/services/entry.service";
-import { LocationHelper } from "@/utils/location.helper";
-import { validateRequiredFields } from "@/utils/firestore.helper";
-import { ILocation } from "@/types/global";
+import {Request, Response} from "express";
+import {GeoPoint} from "@google-cloud/firestore";
+import {JournalService} from "@/services/journal.service";
+import {EntryService} from "@/services/entry.service";
+import {LocationHelper} from "@/utils/location.helper";
+import {validateRequiredFields} from "@/utils/firestore.helper";
+import {ILocation} from "@/types/global";
 import _ from "lodash";
 
 const locationController = {
@@ -19,17 +19,25 @@ const locationController = {
       }
 
       if (!validateRequiredFields(req.body, ["coordinate"], res)) {
-        return;
+        return res.apiError({
+          status: 400,
+          message: 'Coordinate is required',
+          error: 'Coordinate field is required'
+        });
       }
 
-      const { coordinate, place, street, city, region, country, value } =
+      const {coordinate, place, street, city, region, country, value} =
         req.body;
 
       if (!validateRequiredFields(coordinate, ["latitude", "longitude"], res)) {
-        return;
+        return res.apiError({
+          status: 400,
+          message: 'Coordinate is required',
+          error: 'Coordinate field is required'
+        })
       }
 
-      const { latitude, longitude } = coordinate;
+      const {latitude, longitude} = coordinate;
 
       if (!LocationHelper.isValidCoordinate(latitude, longitude)) {
         return res.apiError({
@@ -143,4 +151,4 @@ const locationController = {
   },
 };
 
-export { locationController };
+export {locationController};
