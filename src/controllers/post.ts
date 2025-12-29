@@ -1,6 +1,6 @@
-import { adminDb } from "@/config/firebase";
-import { IPost, IComment, IReaction } from "@/types/global";
-import { Request, Response } from "express";
+import {adminDb} from "@/config/firebase";
+import {IComment, IPost, IReaction} from "@/types/global";
+import {Request, Response} from "express";
 import {
   fetchDocument,
   fetchDocuments,
@@ -8,8 +8,7 @@ import {
   fetchDocumentWithRelation,
   validateRequiredFields,
 } from "@/utils/firestore.helper";
-import { Timestamp } from "firebase-admin/firestore";
-import { update } from "lodash";
+import {Timestamp} from "firebase-admin/firestore";
 
 const postController = {
   getAllPosts: async (req: Request, res: Response) => {
@@ -49,8 +48,8 @@ const postController = {
       }));
 
       return res.apiResponse(
-        { message: "Posts fetched successfully" },
-        { posts: allPosts }
+        {message: "Posts fetched successfully"},
+        {posts: allPosts}
       );
     } catch (error) {
       console.error("getAllPosts error:", error);
@@ -102,8 +101,8 @@ const postController = {
       };
 
       return res.apiResponse(
-        { message: "Post retrieved successfully" },
-        { post }
+        {message: "Post retrieved successfully"},
+        {post}
       );
     } catch (error) {
       console.error("getPostById error:", error);
@@ -118,7 +117,7 @@ const postController = {
   createPost: async (req: Request, res: Response) => {
     try {
       const userId = req.user?.id;
-      const { caption, image, journal } = req.body;
+      const {caption, image, journal} = req.body;
 
       if (!validateRequiredFields(req.body, ["caption"], res)) return;
 
@@ -134,7 +133,7 @@ const postController = {
       const postRef = await adminDb.collection("posts").add(newPost);
 
       return res.apiResponse(
-        { message: "Post created successfully" },
+        {message: "Post created successfully"},
         {
           post: {
             id: postRef.id,
@@ -176,7 +175,7 @@ const postController = {
         });
       }
 
-      const { caption, images, journal } = req.body;
+      const {caption, images, journal} = req.body;
 
       const updatedPost: Partial<IPost> = {
         updatedAt: Timestamp.now() as any,
@@ -189,7 +188,7 @@ const postController = {
       await adminDb.collection("posts").doc(postId).update(updatedPost);
 
       return res.apiResponse(
-        { message: "Post updated successfully" },
+        {message: "Post updated successfully"},
         {
           post: {
             id: postId,
@@ -253,7 +252,7 @@ const postController = {
 
       await batch.commit();
 
-      return res.apiResponse({ message: "Post deleted successfully" }, null);
+      return res.apiResponse({message: "Post deleted successfully"}, null);
     } catch (error) {
       console.error("deletePost error:", error);
       return res.apiError({
@@ -270,7 +269,7 @@ const postController = {
       const userId = req.user?.id;
       if (!validateRequiredFields(req.body, ["reactionType"], res)) return;
 
-      const { reactionType } = req.body;
+      const {reactionType} = req.body;
 
       const postResult = await fetchDocument<IPost>(
         "posts",
@@ -295,7 +294,7 @@ const postController = {
         });
 
         return res.apiResponse(
-          { message: "Reaction updated successfully" },
+          {message: "Reaction updated successfully"},
           {
             reaction: {
               id: reactionDoc.id,
@@ -318,7 +317,7 @@ const postController = {
         .add(newReaction);
 
       return res.apiResponse(
-        { message: "Reacted to post successfully" },
+        {message: "Reacted to post successfully"},
         {
           reaction: {
             id: reactionRef.id,
@@ -341,7 +340,7 @@ const postController = {
   updateReaction: async (req: Request, res: Response) => {
     try {
       const postId = req.params.id;
-      const { reactionType } = req.body;
+      const {reactionType} = req.body;
       const userId = req.user?.id;
       if (!validateRequiredFields(req.body, ["reactionType"], res)) return;
 
@@ -377,7 +376,7 @@ const postController = {
       });
 
       return res.apiResponse(
-        { message: "Reaction updated successfully" },
+        {message: "Reaction updated successfully"},
         {
           reaction: {
             id: reactionDoc.id,
@@ -428,7 +427,7 @@ const postController = {
       await reactionQuery.docs[0].ref.delete();
 
       return res.apiResponse(
-        { message: "Reaction removed successfully" },
+        {message: "Reaction removed successfully"},
         null
       );
     } catch (error) {
@@ -444,7 +443,7 @@ const postController = {
   addComment: async (req: Request, res: Response) => {
     try {
       const postId = req.params.id;
-      const { content } = req.body;
+      const {content} = req.body;
       const userId = req.user?.id;
 
       if (!validateRequiredFields(req.body, ["content"], res)) return;
@@ -469,7 +468,7 @@ const postController = {
       const commentRef = await adminDb.collection("comments").add(newComment);
 
       return res.apiResponse(
-        { message: "Comment added successfully" },
+        {message: "Comment added successfully"},
         {
           comment: {
             id: commentRef.id,
@@ -493,7 +492,7 @@ const postController = {
     try {
       const postId = req.params.id;
       const commentId = req.params.commentId;
-      const { content } = req.body;
+      const {content} = req.body;
       const userId = req.user?.id;
 
       if (!validateRequiredFields(req.body, ["content"], res)) return;
@@ -545,7 +544,7 @@ const postController = {
         .update(updatedComment);
 
       return res.apiResponse(
-        { message: "Comment updated successfully" },
+        {message: "Comment updated successfully"},
         {
           comment: {
             id: commentId,
@@ -598,7 +597,6 @@ const postController = {
         });
       }
 
-      // Authorization check (comment owner or post owner can delete)
       if (
         commentResult.data!.userId !== userId &&
         postResult.data!.userId !== userId
@@ -612,7 +610,7 @@ const postController = {
 
       await adminDb.collection("comments").doc(commentId).delete();
 
-      return res.apiResponse({ message: "Comment deleted successfully" }, null);
+      return res.apiResponse({message: "Comment deleted successfully"}, null);
     } catch (error) {
       console.error("deleteComment error:", error);
       return res.apiError({
@@ -624,4 +622,4 @@ const postController = {
   },
 };
 
-export { postController };
+export {postController};

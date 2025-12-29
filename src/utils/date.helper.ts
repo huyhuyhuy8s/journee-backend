@@ -1,7 +1,4 @@
 export class DateHelper {
-  /**
-   * Get date string in YYYY-MM-DD format
-   */
   static getDateKey(date: Date = new Date()): string {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -9,9 +6,6 @@ export class DateHelper {
     return `${year}-${month}-${day}`;
   }
 
-  /**
-   * Check if date is today
-   */
   static isToday(date: Date): boolean {
     const today = new Date();
     return (
@@ -22,20 +16,35 @@ export class DateHelper {
   }
 
   /**
-   * Get start of day (00:00:00)
+   * Get start of day (00:00:00) in specified timezone, returned as UTC timestamp
+   * For UTC+7: Dec 28 00:00 local = Dec 27 17:00 UTC
    */
-  static getStartOfDay(date: Date = new Date()): Date {
-    const newDate = new Date(date);
-    newDate.setHours(0, 0, 0, 0);
-    return newDate;
+  static getStartOfDay(timezoneOffset = 7): Date {
+    const now = new Date();
+
+    // Get current time in target timezone
+    const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
+    const localTime = new Date(utcTime + timezoneOffset * 3600000);
+
+    // Set to start of day in that timezone
+    localTime.setHours(0, 0, 0, 0);
+
+    // Convert back to UTC by subtracting the offset
+    return new Date(localTime.getTime() - timezoneOffset * 3600000);
   }
 
   /**
-   * Get end of day (23:59:59.999)
+   * Get end of day (23:59:59.999) in specified timezone, returned as UTC timestamp
+   * For UTC+7: Dec 28 23:59 local = Dec 28 16:59 UTC
    */
-  static getEndOfDay(date: Date = new Date()): Date {
-    const newDate = new Date(date);
-    newDate.setHours(23, 59, 59, 999);
-    return newDate;
+  static getEndOfDay(timezoneOffset = 7): Date {
+    const now = new Date();
+
+    const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
+    const localTime = new Date(utcTime + timezoneOffset * 3600000);
+
+    localTime.setHours(23, 59, 59, 999);
+
+    return new Date(localTime.getTime() - timezoneOffset * 3600000);
   }
 }

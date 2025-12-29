@@ -1,5 +1,5 @@
-import { Request } from "express";
-import { GeoPoint, Timestamp } from "firebase-admin/firestore";
+import {Request} from "express";
+import {GeoPoint, Timestamp} from "firebase-admin/firestore";
 
 export enum EUserLocationState {
   FAST_MOVING = "FAST_MOVING",
@@ -14,6 +14,7 @@ export interface IUser {
   password: string;
   avatar: string;
   roleId: ERole;
+  isActive: boolean;
   createdAt: Timestamp | Date;
   updatedAt: Timestamp | Date;
   lastLogin: Timestamp | Date;

@@ -9,7 +9,6 @@ import {
   fetchDocumentWithRelation,
 } from "@/utils/firestore.helper";
 import {Response} from "express";
-import {config} from "@/config/env";
 
 export const JournalService = {
   getTodayJournal: async (
@@ -18,20 +17,12 @@ export const JournalService = {
     const startOfDay = Timestamp.fromDate(DateHelper.getStartOfDay());
     const endOfDay = Timestamp.fromDate(DateHelper.getEndOfDay());
 
-    console.log('getTodayJournal - userId:', userId);
-    console.log('getTodayJournal - startOfDay:', startOfDay.toDate());
-    console.log('getTodayJournal - endOfDay:', endOfDay.toDate());
-
-    console.log('adminDb', config.FIRESTORE_ADMIN_PRIVATE_KEY, '....A**@(!UIJE@!)NE!@IEN)!@IJE)!@E)I!@JEI!@JE)@!JE)!J@EAKKCASCNAKSC............')
-
     try {
       const result = await fetchDocumentsWithQuery<IJournal>("journals", [
         {field: "userId", operator: "==", value: userId},
         {field: "createdAt", operator: ">=", value: startOfDay},
         {field: "createdAt", operator: "<=", value: endOfDay},
       ]);
-
-      console.log('getTodayJournal - result:', JSON.stringify(result, null, 2));
 
       if (!result.success || !result.parents || result.parents.length === 0) {
         return {success: false};

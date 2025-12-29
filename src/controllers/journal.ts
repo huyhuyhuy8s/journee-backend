@@ -1,9 +1,8 @@
-import { IEntry, IJournal, ILocation } from "@/types/global";
-import { validateRequiredFields } from "@/utils/firestore.helper";
-import { Request, Response } from "express";
-import { GeoPoint, Timestamp } from "firebase-admin/firestore";
-import { JournalService } from "@/services/journal.service";
-import { EntryService } from "@/services/entry.service";
+import {validateRequiredFields} from "@/utils/firestore.helper";
+import {Request, Response} from "express";
+import {GeoPoint, Timestamp} from "firebase-admin/firestore";
+import {JournalService} from "@/services/journal.service";
+import {EntryService} from "@/services/entry.service";
 import _ from "lodash";
 
 const journalController = {
@@ -29,8 +28,8 @@ const journalController = {
       );
 
       return res.apiResponse(
-        { message: "Journals fetched successfully" },
-        { journals: journalsWithEntries }
+        {message: "Journals fetched successfully"},
+        {journals: journalsWithEntries}
       );
     } catch (error) {
       console.error("Get all journals error:", error);
@@ -60,7 +59,7 @@ const journalController = {
       }
 
       return res.apiResponse(
-        { message: "Journal retrieved successfully" },
+        {message: "Journal retrieved successfully"},
         {
           journal: {
             ...result.journal,
@@ -86,13 +85,13 @@ const journalController = {
 
       if (!validateRequiredFields(req.body, ["name"], res)) return;
 
-      const { name } = req.body;
+      const {name} = req.body;
 
       const journal = await JournalService.createJournal(userId, name);
 
       return res.apiResponse(
-        { message: "Journal created successfully" },
-        { journal }
+        {message: "Journal created successfully"},
+        {journal}
       );
     } catch (error) {
       console.error("Create journal error:", error);
@@ -111,7 +110,7 @@ const journalController = {
 
       if (!validateRequiredFields(req.body, ["name"], res)) return;
 
-      const { name } = req.body;
+      const {name} = req.body;
 
       const isOwner = await JournalService.isJournalOwner(
         journalId,
@@ -130,8 +129,8 @@ const journalController = {
       await JournalService.updateJournal(journalId, name);
 
       return res.apiResponse(
-        { message: "Journal updated successfully" },
-        { journal: { id: journalId, name } }
+        {message: "Journal updated successfully"},
+        {journal: {id: journalId, name}}
       );
     } catch (error) {
       console.error("Update journal error:", error);
@@ -164,7 +163,7 @@ const journalController = {
 
       await JournalService.deleteJournal(journalId);
 
-      return res.apiResponse({ message: "Journal deleted successfully" }, null);
+      return res.apiResponse({message: "Journal deleted successfully"}, null);
     } catch (error) {
       console.error("Delete journal error:", error);
       return res.apiError({
@@ -182,7 +181,7 @@ const journalController = {
 
       if (!validateRequiredFields(req.body, ["name", "location"], res)) return;
 
-      const { name, location, images, thought } = req.body;
+      const {name, location, images, thought} = req.body;
 
       const isOwner = await JournalService.isJournalOwner(
         journalId,
@@ -222,8 +221,8 @@ const journalController = {
       );
 
       return res.apiResponse(
-        { message: "Journal entry added successfully" },
-        { entry }
+        {message: "Journal entry added successfully"},
+        {entry}
       );
     } catch (error) {
       console.error("Add journal entry error:", error);
@@ -237,7 +236,7 @@ const journalController = {
 
   updateJournalEntry: async (req: Request, res: Response) => {
     try {
-      const { id: journalId, entryId } = req.params;
+      const {id: journalId, entryId} = req.params;
       const userId = req.user!.id;
 
       if (!req.body || _.isEmpty(req.body)) {
@@ -248,7 +247,7 @@ const journalController = {
         });
       }
 
-      const { name, location, images, thought } = req.body;
+      const {name, location, images, thought} = req.body;
 
       const isOwner = await JournalService.isJournalOwner(
         journalId,
@@ -305,8 +304,8 @@ const journalController = {
       await EntryService.updateEntry(entryId, updates);
 
       return res.apiResponse(
-        { message: "Journal entry updated successfully" },
-        { entry: { id: entryId, ...entryResult.data, ...updates } }
+        {message: "Journal entry updated successfully"},
+        {entry: {id: entryId, ...entryResult.data, ...updates}}
       );
     } catch (error) {
       console.error("Update journal entry error:", error);
@@ -320,7 +319,7 @@ const journalController = {
 
   deleteJournalEntry: async (req: Request, res: Response) => {
     try {
-      const { id: journalId, entryId } = req.params;
+      const {id: journalId, entryId} = req.params;
       const userId = req.user!.id;
 
       const isOwner = await JournalService.isJournalOwner(
@@ -354,7 +353,7 @@ const journalController = {
       await EntryService.deleteEntry(entryId);
 
       return res.apiResponse(
-        { message: "Journal entry deleted successfully" },
+        {message: "Journal entry deleted successfully"},
         null
       );
     } catch (error) {
@@ -369,13 +368,13 @@ const journalController = {
 
   updateEntryTimes: async (req: Request, res: Response) => {
     try {
-      const { id: journalId, entryId } = req.params;
+      const {id: journalId, entryId} = req.params;
       const userId = req.user!.id;
       if (
         !validateRequiredFields(req.body, ["arrivalTime", "departureTime"], res)
       )
         return;
-      const { arrivalTime, departureTime } = req.body;
+      const {arrivalTime, departureTime} = req.body;
 
       const isOwner = await JournalService.isJournalOwner(
         journalId,
@@ -418,7 +417,7 @@ const journalController = {
       await EntryService.updateEntryTimes(entryId, times);
 
       return res.apiResponse(
-        { message: "Entry times updated successfully" },
+        {message: "Entry times updated successfully"},
         null
       );
     } catch (error) {
@@ -432,4 +431,4 @@ const journalController = {
   },
 };
 
-export { journalController };
+export {journalController};
