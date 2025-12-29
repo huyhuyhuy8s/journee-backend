@@ -1,27 +1,18 @@
-import {
-  IUser,
-  IUserSetting,
-  ELocationSetting,
-  IBlacklist,
-  ERole,
-} from "@/types";
-import { Request, Response } from "express";
-import { Timestamp } from "firebase-admin/firestore";
+import {ELocationSetting, ERole, IBlacklist, IUser, IUserSetting,} from "@/types";
+import {Request, Response} from "express";
+import {Timestamp} from "firebase-admin/firestore";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { adminDb } from "@/config/firebase";
-import { JWTService } from "@/services/jwt.service";
+import {adminDb} from "@/config/firebase";
+import {JWTService} from "@/services/jwt.service";
 import _ from "lodash";
-import { config } from "@/config/env";
-import {
-  fetchDocuments,
-  validateRequiredFields,
-} from "@/utils/firestore.helper";
+import {config} from "@/config/env";
+import {fetchDocuments, validateRequiredFields,} from "@/utils/firestore.helper";
 
 const JWT_SECRET = config.JWT_SECRET;
 
 const generateToken = (userId: string, userRole: ERole) => {
-  return jwt.sign({ userId: userId, userRole: userRole }, JWT_SECRET, {
+  return jwt.sign({userId: userId, userRole: userRole}, JWT_SECRET, {
     expiresIn: "7d",
   });
 };
@@ -98,7 +89,7 @@ const cleanUpUserSettings = async (userId: string) => {
 const userController = {
   createUser: async (req: Request, res: Response) => {
     try {
-      const { name, email, password, avatar } = req.body;
+      const {name, email, password, avatar} = req.body;
 
       if (!validateRequiredFields(req.body, ["name", "email", "password"], res))
         return;
@@ -123,6 +114,7 @@ const userController = {
           name
         )}&background=random`,
         roleId: ERole.USER,
+        isActive: true,
         createdAt: Timestamp.fromDate(new Date()),
         updatedAt: Timestamp.fromDate(new Date()),
         lastLogin: Timestamp.fromDate(new Date()),
@@ -252,7 +244,7 @@ const userController = {
 
   updateUser: async (req: Request, res: Response) => {
     const userId = req.params.id;
-    const { name, email, avatar }: Partial<IUser> = req.body;
+    const {name, email, avatar}: Partial<IUser> = req.body;
 
     const userDocRef = adminDb.collection("users").doc(userId);
     const userDoc = await userDocRef.get();
@@ -308,7 +300,7 @@ const userController = {
 
   login: async (req: Request, res: Response) => {
     try {
-      const { email, password } = req.body;
+      const {email, password} = req.body;
       if (!email || !password) {
         return res.apiError({
           status: 400,
@@ -338,6 +330,7 @@ const userController = {
         password: userDoc.data().password,
         avatar: userDoc.data().avatar,
         roleId: userDoc.data().roleId,
+        isActive: userDoc.data().isActive || false,
         createdAt: userDoc.data().createdAt,
         updatedAt: userDoc.data().updatedAt,
         lastLogin: userDoc.data().lastLogin,
@@ -354,7 +347,7 @@ const userController = {
         });
       }
       const now = Timestamp.now();
-      await adminDb.doc(userDoc.ref.path).update({ lastLogin: now });
+      await adminDb.doc(userDoc.ref.path).update({lastLogin: now});
 
       const token = generateToken(userResponse.id, userResponse.roleId);
       console.log(
@@ -423,7 +416,40 @@ const userController = {
       });
     } catch (error) {
       console.error("Logout error:", error);
-      res.status(500).json({ error: "Internal server error" });
+      res.status(500).json({error: "Internal server error"});
+    }
+  },
+
+  deactivateUser: async (req: Request, res: Response) => {
+    try {
+      const userId = req.params.id;
+      const userDocRef = adminDb.collection("users").doc(userId);
+      const userDoc = await userDocRef.get();
+
+      if (!userDoc.exists) {
+        return res.apiError({
+          status: 404,
+          message: "User not found",
+          error: "Not Found",
+        });
+      }
+
+      const updatedUser: Partial<IUser> = {
+        isActive: false,
+      }
+
+      await userDocRef.update(updatedUser);
+      return res.apiResponse({
+        status: 200,
+        message: "User deactivated successfully",
+      });
+    } catch (error) {
+      console.error("Deactivate user error:", error);
+      return res.apiError({
+        status: 500,
+        message: "Internal server error",
+        error: "Internal Server Error",
+      });
     }
   },
 
@@ -464,7 +490,7 @@ const userController = {
       );
     } catch (error) {
       console.error("Token validation error:", error);
-      res.status(500).json({ error: "Internal server error" });
+      res.status(500).json({error: "Internal server error"});
     }
   },
 
@@ -486,4 +512,4 @@ const userController = {
   },
 };
 
-export { userController };
+export {userController};
