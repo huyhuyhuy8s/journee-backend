@@ -521,9 +521,7 @@ export const getTodayJournal = async (req: Request, res: Response) => {
     }
 
     const userId = req.user.userId;
-    console.info('Today\'s journal:', userId);
     const journalResult = await JournalService.getTodayJournal(userId);
-    console.info('Journal result:', journalResult);
 
     if (!journalResult.success || !journalResult.data) {
       return res.apiResponse(
