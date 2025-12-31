@@ -1,5 +1,4 @@
-// src/types/express.d.ts
-import { UserPayload, ApiResponse } from "./global";
+import type {UserPayload} from './global';
 
 declare global {
   namespace Express {
@@ -7,22 +6,23 @@ declare global {
       user?: UserPayload;
       token?: string;
     }
+
     interface Response {
-      apiResponse<T = any>(
+      apiResponse<T = unknown>(
         meta: {
           status?: number;
           message: string;
           error?: string;
         },
-        results?: T | null
+        results?: T | null,
       ): this;
 
-      apiSuccess<T = any>(
+      apiSuccess<T = unknown>(
         meta: {
           status?: number;
           message: string;
         },
-        results?: T
+        results?: T,
       ): this;
 
       apiError(meta: { status: number; message: string; error: string }): this;

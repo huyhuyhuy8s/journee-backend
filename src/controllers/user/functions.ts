@@ -1,0 +1,78 @@
+import _ from 'lodash';
+import type {IBlacklist, IUserSetting} from '@/types';
+import {adminDb} from '@/config/firebase';
+import {ELocationSetting, type ERole} from '@/constants';
+import jwt from 'jsonwebtoken';
+import {config} from '@/config/env';
+
+export const generateToken = (userId: string, userRole: ERole) => {
+  return jwt.sign({userId: userId, userRole: userRole}, config.JWT_SECRET, {
+    expiresIn: '7d',
+  });
+};
+
+export const checkIsUserExist = async (userId: string) => {
+  if (_.isUndefined(userId)) return false;
+
+  const userDoc = await adminDb.collection('users').doc(userId).get();
+  return userDoc.exists;
+};
+export const settingCreation = async (userId: string) => {
+  const isUserExist = await checkIsUserExist(userId);
+  if (!isUserExist) return;
+
+  const userSettings: IUserSetting = {
+    userId,
+    visibility: {
+      journalEntries: false,
+      locationHistory: false,
+      location: ELocationSetting.PRECISE,
+    },
+    action: {
+      addFriend: true,
+      commentPost: true,
+    },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  await adminDb.collection('userSettings').add(userSettings);
+};
+export const blacklistCreation = async (userId: string) => {
+  const isUserExist = await checkIsUserExist(userId);
+  if (!isUserExist) return;
+
+  const userBlacklist: IBlacklist = {
+    userId,
+    blockedUsers: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  await adminDb.collection('userBlacklists').add(userBlacklist);
+};
+export const cleanUpUserSettings = async (userId: string) => {
+  const settingsSnap = await adminDb
+    .collection('userSettings')
+    .where('userId', '==', userId)
+    .get();
+
+  if (!settingsSnap.empty) {
+    const deletions = settingsSnap.docs.map((doc) =>
+      adminDb.collection('userSettings').doc(doc.id).delete(),
+    );
+    await Promise.all(deletions);
+  }
+
+  const userBlacklistSnap = await adminDb
+    .collection('userBlacklists')
+    .where('userId', '==', userId)
+    .get();
+
+  if (!userBlacklistSnap.empty) {
+    const deletions = userBlacklistSnap.docs.map((doc) =>
+      adminDb.collection('userBlacklists').doc(doc.id).delete(),
+    );
+    await Promise.all(deletions);
+  }
+};
