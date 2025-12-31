@@ -17,3 +17,9 @@ dev:
 
 start:
 	yarn start
+
+lint:
+	yarn lint
+
+lint-fix:
+	yarn lint:fix

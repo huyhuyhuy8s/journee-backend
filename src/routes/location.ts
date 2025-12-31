@@ -1,12 +1,11 @@
-import express from "express";
-import { locationController } from "@/controllers/location";
-import { authenticateToken } from "@/middlewares/auth";
+import express from 'express';
+import {authenticateToken} from '@/middlewares/auth';
+import {updateLocation} from '@/controllers';
 
 const router = express.Router();
 
 router.use(authenticateToken);
 
-router.post("/", locationController.updateLocation);
-router.get("/", locationController.getTodayStatus);
+router.post('/', updateLocation);
 
 export default router;

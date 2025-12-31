@@ -1,12 +1,12 @@
-import { Response } from "express";
-import { ApiResponse } from "@/types/global";
+import type {Response} from 'express';
+import type {ApiResponse} from '@/types/global';
 
-export const sendResponse = <T = any>(
+export const sendResponse = <T = unknown>(
   res: Response,
   status: number,
   message: string,
   results: T | null = null,
-  error: string = ""
+  error = '',
 ): Response<ApiResponse<T>> => {
   return res.status(status).json({
     meta: {
@@ -18,20 +18,20 @@ export const sendResponse = <T = any>(
   });
 };
 
-export const sendSuccess = <T = any>(
+export const sendSuccess = <T = unknown>(
   res: Response,
   message: string,
   results: T,
-  status: number = 200
+  status = 200,
 ) => {
-  return sendResponse(res, status, message, results, "");
+  return sendResponse(res, status, message, results, '');
 };
 
 export const sendError = (
   res: Response,
   status: number,
   message: string,
-  error: string
+  error: string,
 ) => {
   return sendResponse(res, status, message, null, error);
 };

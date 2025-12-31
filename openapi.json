@@ -458,7 +458,7 @@
                       "type": "string",
                       "example": "OK"
                     },
-                    "timestamp": {
+                    "time": {
                       "type": "string",
                       "format": "date-time"
                     }
@@ -640,9 +640,15 @@
     },
     "/api/users/validate-token": {
       "get": {
-        "summary": "Validate JWT token",
+        "summary": "Validate current token",
+        "description": "Validates the token and returns the current user profile",
         "tags": [
           "Authentication"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ],
         "responses": {
           "200": {
@@ -650,7 +656,20 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponse"
+                  "type": "object",
+                  "properties": {
+                    "meta": {
+                      "type": "object"
+                    },
+                    "results": {
+                      "type": "object",
+                      "properties": {
+                        "user": {
+                          "$ref": "#/components/schemas/User"
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -663,13 +682,53 @@
     },
     "/api/users/cleanup-tokens": {
       "post": {
-        "summary": "Cleanup expired tokens",
+        "summary": "Cleanup expired tokens (Admin only)",
         "tags": [
           "Authentication"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ],
         "responses": {
           "200": {
             "description": "Tokens cleaned up successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/deactivate/{id}": {
+      "post": {
+        "summary": "Deactivate user account (Admin only)",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deactivated successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -686,6 +745,11 @@
         "summary": "Get current user",
         "tags": [
           "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ],
         "responses": {
           "200": {
@@ -716,9 +780,14 @@
     },
     "/api/users/all": {
       "get": {
-        "summary": "Get all users",
+        "summary": "Get all users (Admin only)",
         "tags": [
           "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ],
         "responses": {
           "200": {
@@ -844,9 +913,14 @@
         }
       },
       "delete": {
-        "summary": "Delete user",
+        "summary": "Delete user (Admin only)",
         "tags": [
           "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ],
         "parameters": [
           {
@@ -872,12 +946,17 @@
         }
       }
     },
-    "/api/location": {
+    "/api/locations": {
       "post": {
         "summary": "Update user location",
         "description": "Updates location and creates/updates journal entry based on location logic. If same location, updates departure time. If different location, closes previous entry and creates new one.",
         "tags": [
           "Location"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ],
         "requestBody": {
           "required": true,
@@ -971,41 +1050,6 @@
             }
           }
         }
-      },
-      "get": {
-        "summary": "Get today's status",
-        "description": "Get today's journal and latest entry",
-        "tags": [
-          "Location"
-        ],
-        "responses": {
-          "200": {
-            "description": "Status retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "meta": {
-                      "type": "object"
-                    },
-                    "results": {
-                      "type": "object",
-                      "properties": {
-                        "journal": {
-                          "$ref": "#/components/schemas/Journal"
-                        },
-                        "latestEntry": {
-                          "$ref": "#/components/schemas/Entry"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
       }
     },
     "/api/journals": {
@@ -1081,11 +1125,82 @@
         }
       }
     },
+    "/api/journals/today": {
+      "get": {
+        "summary": "Get today's journal status",
+        "description": "Returns today's journal and the latest entry for the authenticated user",
+        "tags": [
+          "Journals"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Today's status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "integer",
+                          "example": 200
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Today's status retrieved successfully"
+                        }
+                      }
+                    },
+                    "results": {
+                      "type": "object",
+                      "properties": {
+                        "journal": {
+                          "oneOf": [
+                            {
+                              "$ref": "#/components/schemas/Journal"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "latestEntry": {
+                          "oneOf": [
+                            {
+                              "$ref": "#/components/schemas/Entry"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/journals/{id}": {
       "get": {
         "summary": "Get journal by ID with entries",
         "tags": [
           "Journals"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ],
         "parameters": [
           {
@@ -1129,56 +1244,15 @@
           }
         }
       },
-      "put": {
+      "patch": {
         "summary": "Update journal name",
         "tags": [
           "Journals"
         ],
-        "parameters": [
+        "security": [
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
+            "bearerAuth": []
           }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "name"
-                ],
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Journal updated successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "summary": "Update journal name (partial)",
-        "tags": [
-          "Journals"
         ],
         "parameters": [
           {
@@ -1226,6 +1300,11 @@
         "tags": [
           "Journals"
         ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -1255,6 +1334,11 @@
         "summary": "Add entry to journal",
         "tags": [
           "Journal Entries"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ],
         "parameters": [
           {
@@ -1327,10 +1411,15 @@
       }
     },
     "/api/journals/{id}/entry/{entryId}": {
-      "put": {
+      "patch": {
         "summary": "Update journal entry",
         "tags": [
           "Journal Entries"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ],
         "parameters": [
           {
@@ -1389,69 +1478,15 @@
           }
         }
       },
-      "patch": {
-        "summary": "Update journal entry (partial)",
-        "tags": [
-          "Journal Entries"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "entryId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "thought": {
-                    "type": "string"
-                  },
-                  "images": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Entry updated successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponse"
-                }
-              }
-            }
-          }
-        }
-      },
       "delete": {
         "summary": "Delete journal entry",
         "tags": [
           "Journal Entries"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ],
         "parameters": [
           {
@@ -1490,6 +1525,11 @@
         "summary": "Update entry arrival/departure times",
         "tags": [
           "Journal Entries"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ],
         "parameters": [
           {
@@ -1549,6 +1589,11 @@
         "tags": [
           "Posts"
         ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "Posts retrieved successfully",
@@ -1582,6 +1627,11 @@
         "summary": "Create post",
         "tags": [
           "Posts"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ],
         "requestBody": {
           "required": true,
@@ -1633,6 +1683,11 @@
         "tags": [
           "Posts"
         ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -1669,10 +1724,15 @@
           }
         }
       },
-      "put": {
+      "patch": {
         "summary": "Update post",
         "tags": [
           "Posts"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ],
         "parameters": [
           {
@@ -1727,6 +1787,11 @@
         "summary": "Delete post",
         "tags": [
           "Posts"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ],
         "parameters": [
           {

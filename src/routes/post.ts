@@ -1,25 +1,36 @@
-import express from "express";
-import { postController } from "@/controllers/post";
-import { authenticateToken } from "@/middlewares/auth";
+import express from 'express';
+import {authenticateToken} from '@/middlewares/auth';
+import {
+  addComment,
+  createPost,
+  deleteComment,
+  deletePost,
+  getAllPosts,
+  getPostById,
+  reactPost,
+  removeReaction,
+  updateComment,
+  updatePost,
+  updateReaction
+} from '@/controllers';
 
 const router = express.Router();
 
 router.use(authenticateToken);
 
-router.get("/", postController.getAllPosts);
-router.get("/:id", postController.getPostById);
+router.get('/', getAllPosts);
+router.get('/:id', getPostById);
 
-router.post("/", postController.createPost);
-router.put("/:id", postController.updatePost);
-router.patch("/:id", postController.updatePost);
-router.delete("/:id", postController.deletePost);
+router.post('/', createPost);
+router.patch('/:id', updatePost);
+router.delete('/:id', deletePost);
 
-router.post("/:id/react", postController.reactPost);
-router.patch("/:id/react", postController.updateReaction);
-router.delete("/:id/react", postController.removeReaction);
+router.post('/:id/react', reactPost);
+router.patch('/:id/react', updateReaction);
+router.delete('/:id/react', removeReaction);
 
-router.post("/:id/comment", postController.addComment);
-router.patch("/:id/comment/:commentId", postController.updateComment);
-router.delete("/:id/comment/:commentId", postController.deleteComment);
+router.post('/:id/comment', addComment);
+router.patch('/:id/comment/:commentId', updateComment);
+router.delete('/:id/comment/:commentId', deleteComment);
 
 export default router;

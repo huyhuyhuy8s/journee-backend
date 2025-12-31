@@ -1,6 +1,7 @@
-import { adminDb } from "@/config/firebase";
-import { DocumentSnapshot, QuerySnapshot } from "firebase-admin/firestore";
-import { Request, Response } from "express";
+import {adminDb} from '@/config/firebase';
+import {type DocumentSnapshot, type QuerySnapshot, Timestamp} from 'firebase-admin/firestore';
+import type {Response} from 'express';
+import _ from 'lodash';
 
 export interface FetchDocumentResult<T> {
   success: boolean;
@@ -8,11 +9,37 @@ export interface FetchDocumentResult<T> {
   doc?: DocumentSnapshot;
 }
 
-export const fetchDocument = async <T = any>(
+export const convertTimestamps = <T = unknown>(data: unknown): T => {
+  if (data === null || data === undefined) {
+    return data as T;
+  }
+
+  if (data instanceof Timestamp) {
+    return data.toDate() as T;
+  }
+
+  if (_.isArray(data)) {
+    return data.map(item => convertTimestamps(item)) as T;
+  }
+
+  if (typeof data === 'object' && data.constructor === Object) {
+    const converted: Record<string, unknown> = {};
+    for (const key in data) {
+      if (Object.prototype.hasOwnProperty.call(data, key)) {
+        converted[key] = convertTimestamps((data as Record<string, unknown>)[key]);
+      }
+    }
+    return converted as T;
+  }
+
+  return data as T;
+};
+
+export const fetchDocument = async <T = unknown>(
   collection: string,
   docId: string,
   res: Response,
-  resourceName: string = "Document"
+  resourceName = 'Document',
 ): Promise<FetchDocumentResult<T>> => {
   try {
     const doc = await adminDb.collection(collection).doc(docId).get();
@@ -21,68 +48,72 @@ export const fetchDocument = async <T = any>(
       res.apiError({
         status: 404,
         message: `${resourceName} not found`,
-        error: "Not Found",
+        error: 'Not Found',
       });
-      return { success: false };
+      return {success: false};
     }
 
-    const data = doc.data();
-    if (!data) {
+    const rawData = doc.data();
+    if (!rawData) {
       res.apiError({
         status: 404,
         message: `${resourceName} data is empty`,
-        error: "Not Found",
+        error: 'Not Found',
       });
-      return { success: false };
+      return {success: false};
     }
 
-    return { success: true, data: data as T, doc };
+    const data = convertTimestamps<T>(rawData);
+
+    return {success: true, data, doc};
   } catch (error) {
     res.apiError({
       status: 500,
       message: `Failed to fetch ${resourceName.toLowerCase()}`,
       error: String(error),
     });
-    return { success: false };
+    return {success: false};
   }
 };
 
-export const fetchDocuments = async <T = any>(
+export const fetchDocuments = async <T = unknown>(
   collection: string,
   res: Response,
-  resourceName: string = "Documents"
+  resourceName = 'Documents',
 ): Promise<{ success: boolean; data?: T[]; snapshot?: QuerySnapshot }> => {
   try {
     const snapshot = await adminDb.collection(collection).get();
 
     if (snapshot.empty) {
-      return { success: true, data: [], snapshot };
+      return {success: true, data: [], snapshot};
     }
 
-    const data = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as T[];
+    const data = snapshot.docs.map((doc) => (
+      convertTimestamps<T>({
+        id: doc.id,
+        ...doc.data(),
+      })
+    ));
 
-    return { success: true, data, snapshot };
+    return {success: true, data, snapshot};
   } catch (error) {
     res.apiError({
       status: 500,
       message: `Failed to fetch ${resourceName.toLowerCase()}`,
       error: String(error),
     });
-    return { success: false };
+    return {success: false};
   }
 };
 
-export const fetchDocumentWithRelation = async <T = any, R = any>(
+export const fetchDocumentWithRelation = async <T = unknown, R = unknown>(
   parentCollection: string,
   parentId: string,
   childCollection: string,
   relationField: string,
   res: Response,
-  parentName: string = "Document",
-  childName: string = "Related items"
+  parentName = 'Document',
+  childName = 'Related items',
 ): Promise<{
   success: boolean;
   parent?: T;
@@ -95,22 +126,24 @@ export const fetchDocumentWithRelation = async <T = any, R = any>(
       parentCollection,
       parentId,
       res,
-      parentName
+      parentName,
     );
     if (!parentResult.success) {
-      return { success: false };
+      return {success: false};
     }
 
     // Fetch related children
     const childSnapshot = await adminDb
       .collection(childCollection)
-      .where(relationField, "==", parentId)
+      .where(relationField, '==', parentId)
       .get();
 
-    const children = childSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as R[];
+    const children = childSnapshot.docs.map((doc) => (
+      convertTimestamps<R>({
+        id: doc.id,
+        ...doc.data(),
+      })
+    ));
 
     return {
       success: true,
@@ -124,17 +157,17 @@ export const fetchDocumentWithRelation = async <T = any, R = any>(
       message: `Failed to fetch ${parentName.toLowerCase()} with ${childName.toLowerCase()}`,
       error: String(error),
     });
-    return { success: false };
+    return {success: false};
   }
 };
 
-export const fetchDocumentsWithRelation = async <T = any, R = any>(
+export const fetchDocumentsWithRelation = async <T = unknown, R = unknown>(
   parentCollection: string,
   childCollection: string,
   relationField: string,
   res: Response,
-  parentName: string = "Documents",
-  childName: string = "Related items"
+  parentName = 'Documents',
+  childName = 'Related items',
 ): Promise<{
   success: boolean;
   parents?: (T & { id: string })[];
@@ -157,24 +190,28 @@ export const fetchDocumentsWithRelation = async <T = any, R = any>(
       };
     }
 
-    const parents = parentSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as (T & { id: string })[];
+    const parents = parentSnapshot.docs.map((doc) => (
+      convertTimestamps<T & { id: string }>({
+        id: doc.id,
+        ...doc.data(),
+      })
+    ));
 
     // Fetch all child documents
     const childSnapshot = await adminDb.collection(childCollection).get();
 
-    const children = childSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as (R & { id: string })[];
+    const children = childSnapshot.docs.map((doc) => (
+      convertTimestamps<R & { id: string }>({
+        id: doc.id,
+        ...doc.data(),
+      })
+    ));
 
     // Map children to their parents
     const parentsWithChildren = parents.map((parent) => ({
       ...parent,
       children: children.filter(
-        (child: any) => child[relationField] === parent.id
+        (child) => (child as Record<string, unknown>)[relationField] === parent.id,
       ),
     }));
 
@@ -190,22 +227,22 @@ export const fetchDocumentsWithRelation = async <T = any, R = any>(
       message: `Failed to fetch ${parentName.toLowerCase()} with ${childName.toLowerCase()}`,
       error: String(error),
     });
-    return { success: false };
+    return {success: false};
   }
 };
 
-export const fetchDocumentsWithQuery = async <T = any, R = any>(
+export const fetchDocumentsWithQuery = async <T = unknown, R = unknown>(
   parentCollection: string,
   whereConditions: Array<{
     field: string;
     operator: FirebaseFirestore.WhereFilterOp;
-    value: any;
+    value: unknown;
   }>,
   childCollection?: string,
   relationField?: string,
   res?: Response,
-  parentName: string = "Documents",
-  childName: string = "Related items"
+  parentName = 'Documents',
+  childName = 'Related items',
 ): Promise<{
   success: boolean;
   parents?: (T & { id: string })[];
@@ -234,14 +271,16 @@ export const fetchDocumentsWithQuery = async <T = any, R = any>(
       };
     }
 
-    const parents = parentSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as (T & { id: string })[];
+    const parents = parentSnapshot.docs.map((doc) => (
+      convertTimestamps<T & { id: string }>({
+        id: doc.id,
+        ...doc.data(),
+      })
+    ));
 
     // If no child collection specified, return parents only
     if (!childCollection || !relationField) {
-      return { success: true, parents };
+      return {success: true, parents};
     }
 
     // Fetch related children
@@ -255,13 +294,15 @@ export const fetchDocumentsWithQuery = async <T = any, R = any>(
       const batch = parentIds.slice(i, i + batchSize);
       const childSnapshot = await adminDb
         .collection(childCollection)
-        .where(relationField, "in", batch)
+        .where(relationField, 'in', batch)
         .get();
 
-      const batchChildren = childSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as (R & { id: string })[];
+      const batchChildren = childSnapshot.docs.map((doc) => (
+        convertTimestamps<R & { id: string }>({
+          id: doc.id,
+          ...doc.data(),
+        })
+      ));
 
       allChildren = [...allChildren, ...batchChildren];
     }
@@ -270,7 +311,7 @@ export const fetchDocumentsWithQuery = async <T = any, R = any>(
     const parentsWithChildren = parents.map((parent) => ({
       ...parent,
       children: allChildren.filter(
-        (child: any) => child[relationField] === parent.id
+        (child) => (child as Record<string, unknown>)[relationField] === parent.id,
       ),
     }));
 
@@ -288,35 +329,35 @@ export const fetchDocumentsWithQuery = async <T = any, R = any>(
         error: String(error),
       });
     }
-    return { success: false };
+    return {success: false};
   }
 };
 
 export const validateRequiredFields = (
-  body: any,
+  body: Record<string, unknown>,
   fields: string[],
-  res: Response
+  res: Response,
 ): boolean => {
-  if (!body || typeof body !== "object") {
-    console.error("Request body is undefined or invalid:", body);
+  if (!body || typeof body !== 'object') {
+    console.error('Request body is undefined or invalid:', body);
     res.apiError({
       status: 400,
-      message: "Invalid request body",
-      error: "Request body is required",
+      message: 'Invalid request body',
+      error: 'Request body is required',
     });
     return false;
   }
 
   const missingFields = fields.filter((field) => {
     const value = body[field];
-    return value === undefined || value === null || value === "";
+    return value === undefined || value === null || value === '';
   });
 
   if (missingFields.length > 0) {
     res.apiError({
       status: 400,
-      message: "Validation Error",
-      error: `Missing required fields: ${missingFields.join(", ")}`,
+      message: 'Validation Error',
+      error: `Missing required fields: ${missingFields.join(', ')}`,
     });
     return false;
   }

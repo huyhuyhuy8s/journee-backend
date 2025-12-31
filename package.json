@@ -9,7 +9,9 @@
     "dev": "nodemon",
     "build": "tsc && tsc-alias",
     "lint": "eslint .",
-    "test": "NODE_ENV=test ts-node -r tsconfig-paths/register --watch src/index.ts"
+    "lint:fix": "eslint . --fix",
+    "test": "cross-env NODE_ENV=test tsx watch src/index.ts",
+    "prepare": "husky"
   },
   "keywords": [
     "journee"
@@ -23,7 +25,6 @@
     "cross-env": "^10.1.0",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "express-async-errors": "3.1.1",
     "express-validator": "^7.3.1",
     "firebase": "^12.5.0",
     "firebase-admin": "^13.6.0",
@@ -37,7 +38,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.37.0",
-    "@stylistic/eslint-plugin-js": "^4.4.1",
+    "@stylistic/eslint-plugin": "^5.6.1",
     "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",
@@ -47,10 +48,15 @@
     "@types/node": "^24.10.1",
     "@types/node-cron": "^3.0.11",
     "@types/swagger-ui-express": "^4.1.8",
+    "@typescript-eslint/eslint-plugin": "^8.51.0",
+    "@typescript-eslint/parser": "^8.51.0",
     "concurrently": "^9.2.1",
     "eslint": "^9.37.0",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react": "^7.37.5",
     "globals": "^16.4.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "lodash": "^4.17.21",
     "nodemon": "^3.1.11",
     "rimraf": "^6.1.2",
@@ -58,5 +64,10 @@
     "tsc-alias": "^1.8.16",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
+  },
+  "lint-staged": {
+    "*.{js,ts}": [
+      "yarn lint --fix"
+    ]
   }
 }
