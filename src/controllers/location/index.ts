@@ -15,24 +15,12 @@ export const updateLocation = async (req: Request, res: Response) => {
       });
     }
 
-    if (!validateRequiredFields(req.body, ['coordinate'], res)) {
-      return res.apiError({
-        status: 400,
-        message: 'Coordinate is required',
-        error: 'Coordinate field is required',
-      });
-    }
+    if (!validateRequiredFields(req.body, ['coordinate'], res)) return;
 
     const {coordinate, place, street, city, region, country, value} =
       req.body;
 
-    if (!validateRequiredFields(coordinate, ['latitude', 'longitude'], res)) {
-      return res.apiError({
-        status: 400,
-        message: 'Coordinate is required',
-        error: 'Coordinate field is required',
-      });
-    }
+    if (!validateRequiredFields(coordinate, ['latitude', 'longitude'], res)) return;
 
     const {latitude, longitude} = coordinate;
 
@@ -45,20 +33,25 @@ export const updateLocation = async (req: Request, res: Response) => {
       });
     }
 
-    const userId = req.user.id;
+    const userId = req.user.userId;
     const journalResult = await JournalService.getTodayJournal(userId);
 
-    if (!journalResult.success || !journalResult.data) return;
+    if (!journalResult.success || !journalResult.data) return res.apiError({
+      status: 404,
+      message: 'Journal not found',
+      error: 'No journal exists for today',
+    });
+
     const locationData: Partial<ILocation> = {
       coordinate: {latitude, longitude},
     };
 
-    if (!place) locationData.place = place;
-    if (!street) locationData.street = street;
-    if (!city) locationData.city = city;
-    if (!region) locationData.region = region;
-    if (!country) locationData.country = country;
-    if (!value) locationData.value = value;
+    if (place) locationData.place = place;
+    if (street) locationData.street = street;
+    if (city) locationData.city = city;
+    if (region) locationData.region = region;
+    if (country) locationData.country = country;
+    if (value) locationData.value = value;
 
     const entry = await EntryService.addOrUpdateEntry(
       journalResult.data.id,

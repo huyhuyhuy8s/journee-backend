@@ -8,8 +8,8 @@ export interface IBlacklistToken {
 }
 
 export interface UserPayload {
-  id: string;
-  role: ERole;
+  userId: string;
+  userRole: ERole;
   avatar?: string;
   email?: string;
   name?: string;

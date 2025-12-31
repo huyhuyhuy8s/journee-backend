@@ -81,7 +81,7 @@ export const authenticateToken = async (
         });
       }
 
-      req.user = {id: payload.userId, role: payload.userRole};
+      req.user = {userId: payload.userId, userRole: payload.userRole};
       req.token = token;
 
       console.info('User authenticated:', req.user);
@@ -103,7 +103,15 @@ export const adminAuthenticateToken = async (
   next: NextFunction,
 ) => {
   await authenticateToken(req, res, async () => {
-    if (req.user && req.user.role !== ERole.ADMIN) {
+    if (!req.user) {
+      return res.apiError({
+        status: 401,
+        message: 'Authentication required',
+        error: 'Unauthorized',
+      });
+    }
+
+    if (req.user.userRole !== ERole.ADMIN) {
       return res.apiError({
         status: 403,
         message: 'Permission denied',
@@ -120,7 +128,15 @@ export const moderatorAuthenticateToken = async (
   next: NextFunction,
 ) => {
   await authenticateToken(req, res, async () => {
-    if (req.user && req.user.role === ERole.USER) {
+    if (!req.user) {
+      return res.apiError({
+        status: 401,
+        message: 'Authentication required',
+        error: 'Unauthorized',
+      });
+    }
+
+    if (req.user.userRole === ERole.USER) {
       return res.apiError({
         status: 403,
         message: 'Permission denied',

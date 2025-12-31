@@ -137,7 +137,7 @@ export const getCurrentUser = async (req: Request, res: Response) => {
     });
   }
 
-  const userId = user.id;
+  const userId = user.userId;
 
   const usersSnapDoc = await fetchDocuments<IUser>('users', res, 'User');
   if (!usersSnapDoc.success || !usersSnapDoc.data) return;
@@ -340,7 +340,7 @@ export const logout = async (req: Request, res: Response) => {
       });
     }
 
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     await blacklistToken(token, userId);
 
@@ -397,7 +397,7 @@ export const validateToken = async (req: Request, res: Response) => {
         error: 'Unauthorized',
       });
     }
-    const userId = req.user.id;
+    const userId = req.user.userId;
     const userDoc = await adminDb.collection('users').doc(userId).get();
 
     if (!userDoc.exists) {

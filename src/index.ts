@@ -1,5 +1,5 @@
 import 'module-alias/register';
-import express, {type Application, type Request, type Response} from 'express';
+import express, {type Application, type NextFunction, type Request, type Response} from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
@@ -48,7 +48,7 @@ app.get('/', (_: Request, res: Response) => {
 
 app.use(errorLogger);
 
-app.use((err: Error, _: Request, res: Response) => {
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error(err.stack);
   return res.status(500).json({error: 'Something went wrong!'});
 });

@@ -19,7 +19,7 @@ export const checkIsUserExist = async (userId: string) => {
 };
 export const settingCreation = async (userId: string) => {
   const isUserExist = await checkIsUserExist(userId);
-  if (_.isUndefined(isUserExist)) return;
+  if (!isUserExist) return;
 
   const userSettings: IUserSetting = {
     userId,
@@ -40,7 +40,7 @@ export const settingCreation = async (userId: string) => {
 };
 export const blacklistCreation = async (userId: string) => {
   const isUserExist = await checkIsUserExist(userId);
-  if (_.isUndefined(isUserExist)) return;
+  if (!isUserExist) return;
 
   const userBlacklist: IBlacklist = {
     userId,

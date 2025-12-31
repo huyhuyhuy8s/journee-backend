@@ -5,10 +5,10 @@ import type {IBlacklistToken, UserPayload} from '@/types/global';
 import type {ERole} from '@/constants';
 import type {QueryDocumentSnapshot} from 'firebase-admin/firestore';
 
-export const generateToken = (userId: string, role: ERole): string => {
+export const generateToken = (userId: string, userRole: ERole): string => {
   const payload: UserPayload = {
-    id: userId,
-    role,
+    userId,
+    userRole,
   };
   return jwt.sign(payload, config.JWT_SECRET, {
     expiresIn: config.JWT_EXPIRE,

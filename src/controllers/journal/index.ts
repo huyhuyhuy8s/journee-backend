@@ -14,7 +14,7 @@ export const getAllJournals = async (req: Request, res: Response) => {
       });
     }
 
-    const userId = req.user.id;
+    const userId = req.user.userId;
     const journalsResult = await JournalService.getUserJournals(userId, res);
 
     if (!journalsResult.success || !journalsResult.data) return;
@@ -58,7 +58,7 @@ export const getJournalById = async (req: Request, res: Response) => {
     }
 
     const journalId = req.params.id;
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     const result = await JournalService.getJournalWithEntries(journalId, res);
 
@@ -103,7 +103,7 @@ export const createJournal = async (req: Request, res: Response) => {
       });
     }
 
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     if (!validateRequiredFields(req.body, ['name'], res)) return;
 
@@ -136,8 +136,8 @@ export const updateJournal = async (req: Request, res: Response) => {
     }
 
     const journalId = req.params.id;
-    const userId = req.user.id;
-    const userRole = req.user.role;
+    const userId = req.user.userId;
+    const userRole = req.user.userRole;
 
     if (!validateRequiredFields(req.body, ['name'], res)) return;
 
@@ -185,8 +185,8 @@ export const deleteJournal = async (req: Request, res: Response) => {
     }
 
     const journalId = req.params.id;
-    const userId = req.user.id;
-    const userRole = req.user.role;
+    const userId = req.user.userId;
+    const userRole = req.user.userRole;
 
     const isOwner = await JournalService.isJournalOwner(
       journalId,
@@ -227,8 +227,8 @@ export const addJournalEntry = async (req: Request, res: Response) => {
     }
 
     const journalId = req.params.id;
-    const userId = req.user.id;
-    const userRole = req.user.role;
+    const userId = req.user.userId;
+    const userRole = req.user.userRole;
 
     if (!validateRequiredFields(req.body, ['name', 'location'], res)) return;
 
@@ -295,8 +295,8 @@ export const updateJournalEntry = async (req: Request, res: Response) => {
     }
 
     const {id: journalId, entryId} = req.params;
-    const userId = req.user.id;
-    const userRole = req.user.role;
+    const userId = req.user.userId;
+    const userRole = req.user.userRole;
 
     if (!req.body || _.isEmpty(req.body)) {
       return res.apiError({
@@ -388,8 +388,8 @@ export const deleteJournalEntry = async (req: Request, res: Response) => {
     }
 
     const {id: journalId, entryId} = req.params;
-    const userId = req.user.id;
-    const userRole = req.user.role;
+    const userId = req.user.userId;
+    const userRole = req.user.userRole;
 
     const isOwner = await JournalService.isJournalOwner(
       journalId,
@@ -447,8 +447,8 @@ export const updateEntryTimes = async (req: Request, res: Response) => {
     }
 
     const {id: journalId, entryId} = req.params;
-    const userId = req.user.id;
-    const userRole = req.user.role;
+    const userId = req.user.userId;
+    const userRole = req.user.userRole;
     if (
       !validateRequiredFields(req.body, ['arrivalTime', 'departureTime'], res)
     )
@@ -520,7 +520,7 @@ export const getTodayJournal = async (req: Request, res: Response) => {
       });
     }
 
-    const userId = req.user.id;
+    const userId = req.user.userId;
     console.info('Today\'s journal:', userId);
     const journalResult = await JournalService.getTodayJournal(userId);
     console.info('Journal result:', journalResult);
