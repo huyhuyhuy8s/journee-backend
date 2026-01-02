@@ -452,7 +452,7 @@ export const addComment = async (req: Request, res: Response) => {
     if (!requireAuth(req, res)) return;
 
     const postId = req.params.id;
-    const {content} = req.body;
+    const {context} = req.body;
     const userId = req.user.userId;
 
     if (!validateRequiredFields(req.body, ['content'], res)) return;
@@ -465,10 +465,10 @@ export const addComment = async (req: Request, res: Response) => {
     );
     if (!postResult.success) return;
 
-    const newComment = {
+    const newComment: Omit<IComment, 'id'> = {
       postId,
       userId,
-      content,
+      context,
       createdAt: new Date(),
       updatedAt: new Date(),
     };

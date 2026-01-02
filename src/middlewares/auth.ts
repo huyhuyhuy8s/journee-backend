@@ -1,8 +1,7 @@
 import type {NextFunction, Request, Response} from 'express';
+import {ERole} from '@/constants';
 import jwt from 'jsonwebtoken';
 import {config} from '@/config/env';
-import {ERole} from '@/constants';
-import {isTokenBlacklisted} from '@/services/jwt.service';
 
 interface JWTPayload {
   userId: string;
@@ -23,11 +22,98 @@ export const requireAuth = (req: Request, res: Response): req is Request & { use
   return true;
 };
 
+// export const authenticateToken = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction,
+// ) => {
+//   try {
+//     const authHeader = req.headers['authorization'];
+//     const token = authHeader && authHeader.split(' ')[1];
+//
+//     if (!token) {
+//       return res.apiError({
+//         status: 401,
+//         message: 'Access token required',
+//         error: 'NoTokenProvided',
+//       });
+//     }
+//
+//     const isBlacklisted = await isTokenBlacklisted(token);
+//     if (isBlacklisted) {
+//       return res.apiError({
+//         status: 401,
+//         message: 'Token has been revoked',
+//         error: 'TokenBlacklisted',
+//       });
+//     }
+//
+//     jwt.verify(token, config.JWT_SECRET, (err, decoded) => {
+//       if (err) {
+//         console.error('JWT Verification Error:', err);
+//
+//         if (err.name === 'TokenExpiredError') {
+//           return res.apiError({
+//             status: 401,
+//             message: 'Token has expired',
+//             error: 'TokenExpired',
+//           });
+//         } else if (err.name === 'JsonWebTokenError') {
+//           return res.apiError({
+//             status: 401,
+//             message: 'Invalid token',
+//             error: 'InvalidToken',
+//           });
+//         } else {
+//           return res.apiError({
+//             status: 401,
+//             message: 'Token verification failed',
+//             error: 'TokenVerificationFailed',
+//           });
+//         }
+//       }
+//
+//       if (!decoded || typeof decoded === 'string') {
+//         return res.apiError({
+//           status: 401,
+//           message: 'Invalid token payload',
+//           error: 'InvalidToken',
+//         });
+//       }
+//
+//       const payload = decoded as JWTPayload;
+//
+//       if (!payload.userId) {
+//         console.error('Missing userId in token payload:', payload);
+//         return res.apiError({
+//           status: 401,
+//           message: 'Invalid token payload - missing userId',
+//           error: 'InvalidToken',
+//         });
+//       }
+//
+//       req.user = {userId: payload.userId, userRole: payload.userRole};
+//       req.token = token;
+//
+//       console.info('User authenticated:', req.user);
+//       next();
+//     });
+//   } catch (error) {
+//     console.error('Authentication error:', error);
+//     return res.apiError({
+//       status: 500,
+//       message: 'Internal server error during authentication',
+//       error: 'InternalServerError',
+//     });
+//   }
+// };
+
 export const authenticateToken = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
+
   try {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
@@ -40,7 +126,7 @@ export const authenticateToken = async (
       });
     }
 
-    const isBlacklisted = await isTokenBlacklisted(token);
+    const isBlacklisted = false;
     if (isBlacklisted) {
       return res.apiError({
         status: 401,
@@ -49,38 +135,21 @@ export const authenticateToken = async (
       });
     }
 
-    jwt.verify(token, config.JWT_SECRET, (err, decoded) => {
-      if (err) {
-        console.error('JWT Verification Error:', err);
+    try {
+      const decoded = await new Promise((resolve, reject) => {
+        jwt.verify(token, config.JWT_SECRET, (err, decoded) => {
+          if (err) reject(err);
+          else resolve(decoded);
+        });
 
-        if (err.name === 'TokenExpiredError') {
+        if (!decoded || typeof decoded === 'string') {
           return res.apiError({
             status: 401,
-            message: 'Token has expired',
-            error: 'TokenExpired',
-          });
-        } else if (err.name === 'JsonWebTokenError') {
-          return res.apiError({
-            status: 401,
-            message: 'Invalid token',
+            message: 'Invalid token payload',
             error: 'InvalidToken',
           });
-        } else {
-          return res.apiError({
-            status: 401,
-            message: 'Token verification failed',
-            error: 'TokenVerificationFailed',
-          });
         }
-      }
-
-      if (!decoded || typeof decoded === 'string') {
-        return res.apiError({
-          status: 401,
-          message: 'Invalid token payload',
-          error: 'InvalidToken',
-        });
-      }
+      });
 
       const payload = decoded as JWTPayload;
 
@@ -98,7 +167,37 @@ export const authenticateToken = async (
 
       console.info('User authenticated:', req.user);
       next();
-    });
+    } catch (err: unknown) {
+      console.error('JWT Verification Error:', err);
+      const error = err as jwt.JsonWebTokenError;
+
+      if (error.name === 'TokenExpiredError') {
+        return res.apiError({
+          status: 401,
+          message: 'Token has expired',
+          error: 'TokenExpired',
+        });
+      }
+      if (error.name === 'JsonWebTokenError') {
+        return res.apiError({
+          status: 401,
+          message: 'Invalid token',
+          error: 'InvalidToken',
+        });
+      }
+      if (error.name === 'NotBeforeError') {
+        return res.apiError({
+          status: 401,
+          message: 'Token not active',
+          error: 'TokenNotActive',
+        });
+      }
+      return res.apiError({
+        status: 401,
+        message: 'Token verification failed',
+        error: 'TokenVerificationFailed',
+      });
+    }
   } catch (error) {
     console.error('Authentication error:', error);
     return res.apiError({

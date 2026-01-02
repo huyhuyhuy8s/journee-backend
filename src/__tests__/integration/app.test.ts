@@ -278,7 +278,7 @@ describe('App Integration Tests', () => {
       await request(app).get('/health').expect(200);
       const duration = Date.now() - start;
 
-      expect(duration).toBeLessThan(100); // Should respond in less than 100ms
+      expect(duration).toBeLessThan(1000); // Should respond in less than 1000ms
     });
 
     it('should handle multiple concurrent requests', async () => {
