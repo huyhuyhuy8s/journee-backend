@@ -2,6 +2,7 @@ import type {NextFunction, Request, Response} from 'express';
 import {ERole} from '@/constants';
 import jwt from 'jsonwebtoken';
 import {config} from '@/config/env';
+import {isTokenBlacklisted} from '@/services/jwt.service';
 
 interface JWTPayload {
   userId: string;
@@ -126,7 +127,7 @@ export const authenticateToken = async (
       });
     }
 
-    const isBlacklisted = false;
+    const isBlacklisted = await isTokenBlacklisted(token);
     if (isBlacklisted) {
       return res.apiError({
         status: 401,
@@ -141,15 +142,15 @@ export const authenticateToken = async (
           if (err) reject(err);
           else resolve(decoded);
         });
-
-        if (!decoded || typeof decoded === 'string') {
-          return res.apiError({
-            status: 401,
-            message: 'Invalid token payload',
-            error: 'InvalidToken',
-          });
-        }
       });
+
+      if (!decoded || typeof decoded === 'string') {
+        return res.apiError({
+          status: 401,
+          message: 'Invalid token payload',
+          error: 'InvalidToken',
+        });
+      }
 
       const payload = decoded as JWTPayload;
 
