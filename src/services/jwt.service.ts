@@ -56,7 +56,7 @@ export const isTokenBlacklisted = async (token: string): Promise<boolean> => {
     return !snapshot.empty;
   } catch (error) {
     console.error('Error checking token blacklist:', error);
-    return false;
+    return true;
   }
 };
 
@@ -73,12 +73,17 @@ export const cleanupExpiredTokens = async (): Promise<number> => {
       return 0;
     }
 
-    const batch = adminDb.batch();
-    snapshot.docs.forEach((doc: QueryDocumentSnapshot) => {
-      batch.delete(doc.ref);
-    });
+    const BATCH_SIZE = 500;
+    const docs = snapshot.docs;
 
-    await batch.commit();
+    for (let i = 0; i < docs.length; i += BATCH_SIZE) {
+      const batch = adminDb.batch();
+      const chunk = docs.slice(i, i + BATCH_SIZE);
+      chunk.forEach((doc: QueryDocumentSnapshot) => {
+        batch.delete(doc.ref);
+      });
+      await batch.commit();
+    }
 
     console.info(`Cleaned up ${snapshot.size} expired tokens`);
     return snapshot.size;

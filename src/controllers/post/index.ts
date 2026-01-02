@@ -8,6 +8,7 @@ import {
   validateRequiredFields,
 } from '@/utils/firestore.helper';
 import type {IComment, IPost, IReaction} from '@/types/models';
+import {requireAuth} from '@/middlewares/auth';
 
 export const getAllPosts = async (_: Request, res: Response) => {
   try {
@@ -117,7 +118,9 @@ export const getPostById = async (req: Request, res: Response) => {
 
 export const createPost = async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.userId;
+    if (!requireAuth(req, res)) return;
+
+    const userId = req.user.userId;
     const {caption, images, journal} = req.body;
 
     if (!validateRequiredFields(req.body, ['caption'], res)) return;
@@ -156,8 +159,10 @@ export const createPost = async (req: Request, res: Response) => {
 
 export const updatePost = async (req: Request, res: Response) => {
   try {
+    if (!requireAuth(req, res)) return;
+
     const postId = req.params.id;
-    const userId = req.user?.userId;
+    const userId = req.user.userId;
 
     const postResult = await fetchDocument<IPost>(
       'posts',
@@ -211,8 +216,10 @@ export const updatePost = async (req: Request, res: Response) => {
 
 export const deletePost = async (req: Request, res: Response) => {
   try {
+    if (!requireAuth(req, res)) return;
+
     const postId = req.params.id;
-    const userId = req.user?.userId;
+    const userId = req.user.userId;
 
     const postResult = await fetchDocument<IPost>(
       'posts',
@@ -262,8 +269,10 @@ export const deletePost = async (req: Request, res: Response) => {
 
 export const reactPost = async (req: Request, res: Response) => {
   try {
+    if (!requireAuth(req, res)) return;
+
     const postId = req.params.id;
-    const userId = req.user?.userId;
+    const userId = req.user.userId;
     if (!validateRequiredFields(req.body, ['reactionType'], res)) return;
 
     const {reactionType} = req.body;
@@ -336,9 +345,11 @@ export const reactPost = async (req: Request, res: Response) => {
 
 export const updateReaction = async (req: Request, res: Response) => {
   try {
+    if (!requireAuth(req, res)) return;
+
     const postId = req.params.id;
     const {reactionType} = req.body;
-    const userId = req.user?.userId;
+    const userId = req.user.userId;
     if (!validateRequiredFields(req.body, ['reactionType'], res)) return;
 
     const postResult = await fetchDocument<IPost>(
@@ -392,8 +403,10 @@ export const updateReaction = async (req: Request, res: Response) => {
 
 export const removeReaction = async (req: Request, res: Response) => {
   try {
+    if (!requireAuth(req, res)) return;
+
     const postId = req.params.id;
-    const userId = req.user?.userId;
+    const userId = req.user.userId;
 
     const postResult = await fetchDocument<IPost>(
       'posts',
@@ -436,9 +449,11 @@ export const removeReaction = async (req: Request, res: Response) => {
 
 export const addComment = async (req: Request, res: Response) => {
   try {
+    if (!requireAuth(req, res)) return;
+
     const postId = req.params.id;
     const {content} = req.body;
-    const userId = req.user?.userId;
+    const userId = req.user.userId;
 
     if (!validateRequiredFields(req.body, ['content'], res)) return;
 
@@ -481,10 +496,12 @@ export const addComment = async (req: Request, res: Response) => {
 
 export const updateComment = async (req: Request, res: Response) => {
   try {
+    if (!requireAuth(req, res)) return;
+
     const postId = req.params.id;
     const commentId = req.params.commentId;
     const {content} = req.body;
-    const userId = req.user?.userId;
+    const userId = req.user.userId;
 
     if (!validateRequiredFields(req.body, ['content'], res)) return;
 
@@ -554,9 +571,11 @@ export const updateComment = async (req: Request, res: Response) => {
 
 export const deleteComment = async (req: Request, res: Response) => {
   try {
+    if (!requireAuth(req, res)) return;
+
     const postId = req.params.id;
     const commentId = req.params.commentId;
-    const userId = req.user?.userId;
+    const userId = req.user.userId;
 
     const postResult = await fetchDocument<IPost>(
       'posts',

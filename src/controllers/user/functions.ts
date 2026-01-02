@@ -1,15 +1,7 @@
 import _ from 'lodash';
 import type {IBlacklist, IUserSetting} from '@/types';
 import {adminDb} from '@/config/firebase';
-import {ELocationSetting, type ERole} from '@/constants';
-import jwt from 'jsonwebtoken';
-import {config} from '@/config/env';
-
-export const generateToken = (userId: string, userRole: ERole) => {
-  return jwt.sign({userId: userId, userRole: userRole}, config.JWT_SECRET, {
-    expiresIn: '7d',
-  });
-};
+import {ELocationSetting} from '@/constants';
 
 export const checkIsUserExist = async (userId: string) => {
   if (_.isUndefined(userId)) return false;

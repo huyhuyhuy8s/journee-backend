@@ -12,7 +12,7 @@ export enum ELocationSetting {
 }
 
 export enum ERole {
-  ADMIN = 'Nintendo7131',
-  MODERATOR = 'Destiny4015',
-  USER = 'Salon4637'
+  ADMIN = 'admin',
+  MODERATOR = 'moderator',
+  USER = 'user'
 }

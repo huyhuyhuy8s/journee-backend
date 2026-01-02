@@ -5,10 +5,11 @@ import jwt from 'jsonwebtoken';
 import {adminDb} from '@/config/firebase';
 import _ from 'lodash';
 import {config} from '@/config/env';
-import {fetchDocuments, validateRequiredFields} from '@/utils/firestore.helper';
+import {fetchDocument, fetchDocuments, validateRequiredFields} from '@/utils/firestore.helper';
 import {ERole} from '@/constants';
-import {blacklistCreation, cleanUpUserSettings, generateToken, settingCreation} from '@/controllers/user/functions';
-import {blacklistToken, cleanupExpiredTokens} from '@/services/jwt.service';
+import {blacklistCreation, cleanUpUserSettings, settingCreation} from '@/controllers/user/functions';
+import {blacklistToken, cleanupExpiredTokens, generateToken} from '@/services/jwt.service';
+import {requireAuth} from '@/middlewares/auth';
 
 export const createUser = async (req: Request, res: Response) => {
   try {
@@ -99,20 +100,13 @@ export const getAllUsers = async (_: Request, res: Response) => {
 
 export const getUserById = async (req: Request, res: Response) => {
   const userId = req.params.id;
-  const usersSnap = await fetchDocuments<IUser>('users', res, 'User');
-  if (!usersSnap.success || !usersSnap.data) return;
+  const userResult = await fetchDocument<IUser>('users', userId, res, 'User');
+  if (!userResult.success || !userResult.data) return;
 
-  const userDoc = usersSnap.data.find((u) => u.id === userId);
-  if (!userDoc) {
-    return res.apiError({
-      status: 404,
-      message: 'User not found',
-      error: 'Not Found',
-    });
-  }
+  const userDoc = userResult.data;
 
   const userResponse = {
-    id: userDoc.id,
+    id: userId,
     avatar: userDoc.avatar,
     email: userDoc.email,
     name: userDoc.name,
@@ -128,31 +122,16 @@ export const getUserById = async (req: Request, res: Response) => {
 };
 
 export const getCurrentUser = async (req: Request, res: Response) => {
-  const user = req.user;
-  if (!user) {
-    return res.apiError({
-      status: 401,
-      message: 'Unauthorized',
-      error: 'Authentication Error',
-    });
-  }
+  if (!requireAuth(req, res)) return;
+  const userId = req.user.userId;
 
-  const userId = user.userId;
+  const userSnapDoc = await fetchDocument<IUser>('users', userId, res, 'User');
+  if (!userSnapDoc.success || !userSnapDoc.data) return;
 
-  const usersSnapDoc = await fetchDocuments<IUser>('users', res, 'User');
-  if (!usersSnapDoc.success || !usersSnapDoc.data) return;
-
-  const userDoc = usersSnapDoc.data.find((u) => u.id === userId);
-  if (!userDoc) {
-    return res.apiError({
-      status: 404,
-      message: 'User not found',
-      error: 'Not Found',
-    });
-  }
+  const userDoc = userSnapDoc.data;
 
   const userResponse = {
-    id: userDoc.id,
+    id: userId,
     avatar: userDoc.avatar,
     email: userDoc.email,
     name: userDoc.name,
@@ -351,7 +330,11 @@ export const logout = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Logout error:', error);
-    res.status(500).json({error: 'Internal server error'});
+    return res.apiError({
+      status: 500,
+      message: 'Internal server error',
+      error: 'Internal Server Error',
+    });
   }
 };
 
@@ -425,7 +408,11 @@ export const validateToken = async (req: Request, res: Response) => {
     );
   } catch (error) {
     console.error('Token validation error:', error);
-    res.status(500).json({error: 'Internal server error'});
+    return res.apiError({
+      status: 500,
+      message: 'Internal server error',
+      error: 'Internal Server Error',
+    });
   }
 };
 

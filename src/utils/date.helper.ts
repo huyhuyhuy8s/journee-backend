@@ -5,14 +5,31 @@ export const getDateKey = (date: Date = new Date()): string => {
   return `${year}-${month}-${day}`;
 };
 
-export const isToday = (date: Date): boolean => {
-  const today = new Date();
+export const isToday = (date: Date, timezoneOffset?: number): boolean => {
+  if (timezoneOffset === undefined) {
+    const today = new Date();
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
+  }
+
+  const now = new Date();
+
+  const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
+  const todayInTargetTz = new Date(utcTime + timezoneOffset * 3600000);
+
+  const dateUtcTime = date.getTime() + date.getTimezoneOffset() * 60000;
+  const dateInTargetTz = new Date(dateUtcTime + timezoneOffset * 3600000);
+
   return (
-    date.getDate() === today.getDate() &&
-    date.getMonth() === today.getMonth() &&
-    date.getFullYear() === today.getFullYear()
+    dateInTargetTz.getDate() === todayInTargetTz.getDate() &&
+    dateInTargetTz.getMonth() === todayInTargetTz.getMonth() &&
+    dateInTargetTz.getFullYear() === todayInTargetTz.getFullYear()
   );
 };
+
 
 export const getStartOfDay = (timezoneOffset = 7): Date => {
   const now = new Date();

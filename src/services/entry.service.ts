@@ -236,10 +236,10 @@ export const updateEntry = async (
     updatedAt: new Date(),
   };
 
-  if (updates.name) updateData.name = updates.name;
-  if (updates.location) updateData.location = updates.location;
-  if (updates.images) updateData.images = updates.images;
-  if (updates.thought !== undefined) updateData.thought = updates.thought;
+  if (!_.isUndefined(updates.name)) updateData.name = updates.name;
+  if (!_.isUndefined(updates.location)) updateData.location = updates.location;
+  if (!_.isUndefined(updates.images)) updateData.images = updates.images;
+  if (!_.isUndefined(updates.thought)) updateData.thought = updates.thought;
 
   await adminDb.collection('entries').doc(entryId).update(updateData);
 };

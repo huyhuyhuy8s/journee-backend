@@ -50,11 +50,19 @@ app.use(errorLogger);
 
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error(err.stack);
-  return res.status(500).json({error: 'Something went wrong!'});
+  return res.apiError({
+    status: 500,
+    message: 'Internal Server Error',
+    error: err.message,
+  });
 });
 
 app.use((_: Request, res: Response) => {
-  return res.status(404).json({error: 'Route not found'});
+  return res.apiError({
+    status: 404,
+    message: 'Route not found',
+    error: 'Not Found',
+  });
 });
 
 if (isProduction) {

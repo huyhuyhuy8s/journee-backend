@@ -3,4 +3,6 @@ reviews:
     enabled: true
     base_branches:
       - dev
+      - staging
+      - main
       - feature*

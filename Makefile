@@ -23,3 +23,15 @@ lint:
 
 lint-fix:
 	yarn lint:fix
+
+test:
+	yarn test
+
+test-watch:
+	yarn test:watch
+
+test-coverage:
+	yarn test:coverage
+
+test-verbose:
+	yarn test:verbose
