@@ -1,18 +1,12 @@
-export class DateHelper {
-  /**
-   * Get date string in YYYY-MM-DD format
-   */
-  static getDateKey(date: Date = new Date()): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  }
+export const getDateKey = (date: Date = new Date()): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
-  /**
-   * Check if date is today
-   */
-  static isToday(date: Date): boolean {
+export const isToday = (date: Date, timezoneOffset?: number): boolean => {
+  if (timezoneOffset === undefined) {
     const today = new Date();
     return (
       date.getDate() === today.getDate() &&
@@ -21,21 +15,43 @@ export class DateHelper {
     );
   }
 
-  /**
-   * Get start of day (00:00:00)
-   */
-  static getStartOfDay(date: Date = new Date()): Date {
-    const newDate = new Date(date);
-    newDate.setHours(0, 0, 0, 0);
-    return newDate;
-  }
+  const now = new Date();
 
-  /**
-   * Get end of day (23:59:59.999)
-   */
-  static getEndOfDay(date: Date = new Date()): Date {
-    const newDate = new Date(date);
-    newDate.setHours(23, 59, 59, 999);
-    return newDate;
-  }
-}
+  const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
+  const todayInTargetTz = new Date(utcTime + timezoneOffset * 3600000);
+
+  const dateUtcTime = date.getTime() + date.getTimezoneOffset() * 60000;
+  const dateInTargetTz = new Date(dateUtcTime + timezoneOffset * 3600000);
+
+  return (
+    dateInTargetTz.getDate() === todayInTargetTz.getDate() &&
+    dateInTargetTz.getMonth() === todayInTargetTz.getMonth() &&
+    dateInTargetTz.getFullYear() === todayInTargetTz.getFullYear()
+  );
+};
+
+
+export const getStartOfDay = (timezoneOffset = 7): Date => {
+  const now = new Date();
+
+  // Get current time in target timezone
+  const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
+  const localTime = new Date(utcTime + timezoneOffset * 3600000);
+
+  // Set to start of day in that timezone
+  localTime.setHours(0, 0, 0, 0);
+
+  // Convert back to UTC by subtracting the offset
+  return new Date(localTime.getTime() - timezoneOffset * 3600000);
+};
+
+export const getEndOfDay = (timezoneOffset = 7): Date => {
+  const now = new Date();
+
+  const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
+  const localTime = new Date(utcTime + timezoneOffset * 3600000);
+
+  localTime.setHours(23, 59, 59, 999);
+
+  return new Date(localTime.getTime() - timezoneOffset * 3600000);
+};

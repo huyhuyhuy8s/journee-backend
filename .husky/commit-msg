@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# Get the commit message
+commit_msg_file=$1
+commit_msg=$(cat "$commit_msg_file")
+
+# Check if commit message is empty
+if [ -z "$commit_msg" ]; then
+  echo "Error: Commit message cannot be empty"
+  exit 1
+fi
+
+# Optional: Check minimum length (at least 10 characters)
+if [ ${#commit_msg} -lt 10 ]; then
+  echo "Error: Commit message is too short (minimum 10 characters)"
+  exit 1
+fi

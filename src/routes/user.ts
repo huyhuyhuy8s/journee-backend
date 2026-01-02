@@ -1,22 +1,34 @@
-import express from "express";
-import { userController } from "@/controllers/user";
-import { adminAuthenticateToken, authenticateToken } from "@/middlewares/auth";
+import express from 'express';
+import {adminAuthenticateToken, authenticateToken} from '@/middlewares/auth';
+import {
+  cleanupTokens,
+  createUser,
+  deactivateUser,
+  deleteUser,
+  getAllUsers,
+  getCurrentUser,
+  getUserById,
+  login,
+  logout,
+  updateUser,
+  validateToken
+} from '@/controllers';
 
 const router = express.Router();
 
-// Public routes
-router.post("/login", userController.login);
-router.post("/register", userController.createUser);
+router.post('/login', login);
+router.post('/register', createUser);
 
-// Protected routes
-router.get("/me", authenticateToken, userController.getCurrentUser);
-router.get("/validate-token", authenticateToken, userController.getCurrentUser);
-router.get("/all", adminAuthenticateToken, userController.getAllUsers);
-router.get("/:id", authenticateToken, userController.getUserById);
-router.put("/:id", authenticateToken, userController.updateUser);
-router.delete("/:id", authenticateToken, userController.deleteUser);
+router.get('/me', authenticateToken, getCurrentUser);
+router.get('/validate-token', authenticateToken, getCurrentUser);
+router.get('/all', adminAuthenticateToken, getAllUsers);
+router.get('/:id', authenticateToken, getUserById);
+router.put('/:id', authenticateToken, updateUser);
+router.delete('/:id', adminAuthenticateToken, deleteUser);
 
-router.post("/logout", authenticateToken, userController.logout);
-router.post("/cleanup-tokens", authenticateToken, userController.cleanupTokens);
+router.post('/logout', authenticateToken, logout);
+router.post('/deactivate/:id', adminAuthenticateToken, deactivateUser);
+router.post('/validate', authenticateToken, validateToken);
+router.post('/cleanup-tokens', adminAuthenticateToken, cleanupTokens);
 
 export default router;

@@ -1,22 +1,34 @@
-import express from "express";
-import { journalController } from "@/controllers/journal";
-import { authenticateToken } from "@/middlewares/auth";
+import express from 'express';
+import {authenticateToken} from '@/middlewares/auth';
+import {
+  addJournalEntry,
+  createJournal,
+  deleteJournal,
+  deleteJournalEntry,
+  getAllJournals,
+  getJournalById,
+  getTodayJournal,
+  updateEntryTimes,
+  updateJournal,
+  updateJournalEntry
+} from '@/controllers';
 
 const router = express.Router();
 
 router.use(authenticateToken);
 
-// Journal
-router.get("/", journalController.getAllJournals);
-router.get("/:id", journalController.getJournalById);
+router.get('/', getAllJournals);
+router.get('/today', getTodayJournal);
+router.get('/:id', getJournalById);
 
-router.post("/", journalController.createJournal);
-router.patch("/:id", journalController.updateJournal);
-router.delete("/:id", journalController.deleteJournal);
+router.post('/', createJournal);
+router.patch('/:id', updateJournal);
+router.delete('/:id', deleteJournal);
 
-// Journal Entries
-router.post("/:id/entry", journalController.addJournalEntry);
-router.patch("/:id/entry/:entryId", journalController.updateJournalEntry);
-router.delete("/:id/entry/:entryId", journalController.deleteJournalEntry);
-router.patch("/:id/entry/:entryId/times", journalController.updateEntryTimes);
+router.post('/:id/entry', addJournalEntry);
+router.patch('/:id/entry/:entryId', updateJournalEntry);
+router.delete('/:id/entry/:entryId', deleteJournalEntry);
+
+router.patch('/:id/entry/:entryId/times', updateEntryTimes);
+
 export default router;
