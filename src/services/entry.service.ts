@@ -1,6 +1,5 @@
 import {adminDb} from '@/config/firebase';
 import type {ICoordinates, IEntry, ILocation} from '@/types';
-import {GeoPoint} from 'firebase-admin/firestore';
 import * as LocationHelper from '@/utils/location.helper';
 import {fetchDocument, type FetchDocumentResult, fetchDocumentsWithQuery} from '@/utils/firestore.helper';
 import type {Response} from 'express';
@@ -113,14 +112,16 @@ export const addOrUpdateEntry = async (
 ): Promise<IEntry> => {
   const now = new Date();
 
-  if (!locationData.coordinate) {
+  const coordinate = locationData.coordinate;
+
+  if (!coordinate) {
     throw new Error('Coordinate is required');
   }
 
-  const newGeoPoint = new GeoPoint(
-    locationData.coordinate.latitude,
-    locationData.coordinate.longitude,
-  );
+  const newGeoPoint: ICoordinates = {
+    latitude: coordinate.latitude,
+    longitude: coordinate.longitude,
+  };
 
   const latestEntryResult = await getLatestEntry(journalId);
 

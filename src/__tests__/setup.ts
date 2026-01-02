@@ -12,7 +12,7 @@ jest.mock('@/config/env', () => ({
     PORT: 3000,
     NODE_ENV: 'test',
   },
-}), {virtual: true});
+}));
 
 // Global test timeout
 jest.setTimeout(10000);

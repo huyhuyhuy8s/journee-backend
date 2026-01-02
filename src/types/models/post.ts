@@ -17,6 +17,7 @@ export interface IComment {
   context?: string;
   image?: string;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 export type TReactionType = 'like' | 'love' | 'haha' | 'wow' | 'sad' | 'angry';

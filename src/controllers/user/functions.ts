@@ -28,7 +28,7 @@ export const settingCreation = async (userId: string) => {
     updatedAt: new Date(),
   };
 
-  await adminDb.collection('userSettings').add(userSettings);
+  await adminDb.collection('userSettings').doc(userId).set(userSettings);
 };
 export const blacklistCreation = async (userId: string) => {
   const isUserExist = await checkIsUserExist(userId);
@@ -41,7 +41,7 @@ export const blacklistCreation = async (userId: string) => {
     updatedAt: new Date(),
   };
 
-  await adminDb.collection('userBlacklists').add(userBlacklist);
+  await adminDb.collection('userBlacklists').doc(userId).set(userBlacklist);
 };
 export const cleanUpUserSettings = async (userId: string) => {
   const settingsSnap = await adminDb

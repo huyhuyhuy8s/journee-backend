@@ -18,16 +18,18 @@ export const createUser = async (req: Request, res: Response) => {
     if (!validateRequiredFields(req.body, ['name', 'email', 'password'], res))
       return;
 
-    const allUsersSnap = await fetchDocuments<IUser>('users', res, 'Users');
-    if (!allUsersSnap.success || !allUsersSnap.data) return;
+    const existingUserSnap = await adminDb
+      .collection('users')
+      .where('email', '==', email)
+      .limit(1)
+      .get();
 
-    if (allUsersSnap.data.some((u) => u.email === email)) {
+    if (!existingUserSnap.empty)
       return res.apiError({
         status: 409,
         message: 'User with this email already exists',
         error: 'Conflict',
       });
-    }
 
     const saltRounds = config.BCRYPT_SALT_ROUNDS;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -147,59 +149,77 @@ export const getCurrentUser = async (req: Request, res: Response) => {
 };
 
 export const updateUser = async (req: Request, res: Response) => {
-  const userId = req.params.id;
-  const {name, email, avatar}: Partial<IUser> = req.body;
+  try {
+    const userId = req.params.id;
+    const {name, email, avatar}: Partial<IUser> = req.body;
 
-  const userDocRef = adminDb.collection('users').doc(userId);
-  const userDoc = await userDocRef.get();
+    const userDocRef = adminDb.collection('users').doc(userId);
+    const userDoc = await userDocRef.get();
 
-  const userData = userDoc.data();
-  if (!userDoc.exists || _.isUndefined(userData)) {
+    const userData = userDoc.data();
+    if (!userDoc.exists || _.isUndefined(userData)) {
+      return res.apiError({
+        status: 404,
+        message: 'User not found',
+        error: 'Not Found',
+      });
+    }
+
+    const updatedUser: Partial<IUser> = {
+      ...userData,
+      name: name || userData.name,
+      email: email || userData.email,
+      avatar: avatar || userData.avatar,
+      updatedAt: new Date(),
+    };
+
+    await userDocRef.update(updatedUser);
+
+    return res.apiResponse({
+      status: 200,
+      message: 'User updated successfully',
+    });
+  } catch (err) {
+    console.error('updateUser err:', err);
     return res.apiError({
-      status: 404,
-      message: 'User not found',
-      error: 'Not Found',
+      status: 500,
+      message: 'Internal server error',
+      error: 'Server Error',
     });
   }
-
-  const updatedUser: Partial<IUser> = {
-    ...userData,
-    name: name || userData.name,
-    email: email || userData.email,
-    avatar: avatar || userData.avatar,
-    updatedAt: new Date(),
-  };
-
-  await userDocRef.update(updatedUser);
-
-  return res.apiResponse({
-    status: 200,
-    message: 'User updated successfully',
-  });
 };
 
 export const deleteUser = async (req: Request, res: Response) => {
-  const userId = req.params.id;
+  try {
+    const userId = req.params.id;
 
-  const userDocRef = adminDb.collection('users').doc(userId);
-  const userDoc = await userDocRef.get();
+    const userDocRef = adminDb.collection('users').doc(userId);
+    const userDoc = await userDocRef.get();
 
-  if (!userDoc.exists) {
+    if (!userDoc.exists) {
+      return res.apiError({
+        status: 404,
+        message: 'User not found',
+        error: 'Not Found',
+      });
+    }
+
+    await userDocRef.delete();
+
+    await cleanUpUserSettings(userId);
+
+    return res.apiResponse({
+      status: 200,
+      message: 'User deleted successfully',
+    });
+  } catch (err) {
+    console.error('deleteUser err:', err);
     return res.apiError({
-      status: 404,
-      message: 'User not found',
-      error: 'Not Found',
+      status: 500,
+      message: 'Internal server error',
+      error: 'Server Error',
     });
   }
-
-  await userDocRef.delete();
-
-  await cleanUpUserSettings(userId);
-
-  return res.apiResponse({
-    status: 200,
-    message: 'User deleted successfully',
-  });
 };
 
 export const login = async (req: Request, res: Response) => {
