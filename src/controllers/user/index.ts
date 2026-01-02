@@ -76,76 +76,103 @@ export const createUser = async (req: Request, res: Response) => {
 };
 
 export const getAllUsers = async (_: Request, res: Response) => {
-  const allUsersSnap = await fetchDocuments<IUser>('users', res, 'Users');
-  if (!allUsersSnap.success || !allUsersSnap.data) return;
+  try {
+    const allUsersSnap = await fetchDocuments<IUser>('users', res, 'Users');
+    if (!allUsersSnap.success || !allUsersSnap.data) return;
 
-  const allUsers: IUser[] = allUsersSnap.data.map(
-    (user) =>
-      ({
-        id: user.id,
-        avatar: user.avatar,
-        email: user.email,
-        name: user.name,
-      } as IUser),
-  );
+    const allUsers: IUser[] = allUsersSnap.data.map(
+      (user) =>
+        ({
+          id: user.id,
+          avatar: user.avatar,
+          email: user.email,
+          name: user.name,
+        } as IUser),
+    );
 
-  return res.apiResponse(
-    {
-      status: 200,
-      message: 'Users retrieved successfully',
-    },
-    {
-      users: allUsers,
-    },
-  );
+    return res.apiResponse(
+      {
+        status: 200,
+        message: 'Users retrieved successfully',
+      },
+      {
+        users: allUsers,
+      },
+    );
+  } catch (error) {
+    console.error('getAllUsers err:', error);
+    return res.apiError({
+      status: 500,
+      message: 'Internal server error',
+      error: 'Server Error',
+    });
+  }
 };
 
 export const getUserById = async (req: Request, res: Response) => {
-  const userId = req.params.id;
-  const userResult = await fetchDocument<IUser>('users', userId, res, 'User');
-  if (!userResult.success || !userResult.data) return;
+  try {
+    const userId = req.params.id;
+    const userResult = await fetchDocument<IUser>('users', userId, res, 'User');
+    if (!userResult.success || !userResult.data) return;
 
-  const userDoc = userResult.data;
+    const userDoc = userResult.data;
 
-  const userResponse = {
-    id: userId,
-    avatar: userDoc.avatar,
-    email: userDoc.email,
-    name: userDoc.name,
-  };
+    const userResponse = {
+      id: userId,
+      avatar: userDoc.avatar,
+      email: userDoc.email,
+      name: userDoc.name,
+    };
 
-  return res.apiResponse(
-    {
-      status: 200,
-      message: 'User retrieved successfully',
-    },
-    userResponse,
-  );
+    return res.apiResponse(
+      {
+        status: 200,
+        message: 'User retrieved successfully',
+      },
+      userResponse,
+    );
+  } catch (error) {
+    console.error('getUserById err:', error);
+    return res.apiError({
+      status: 500,
+      message: 'Internal server error',
+      error: 'Server Error',
+    });
+  }
 };
 
 export const getCurrentUser = async (req: Request, res: Response) => {
-  if (!requireAuth(req, res)) return;
-  const userId = req.user.userId;
+  try {
+    if (!requireAuth(req, res)) return;
+    const userId = req.user.userId;
 
-  const userSnapDoc = await fetchDocument<IUser>('users', userId, res, 'User');
-  if (!userSnapDoc.success || !userSnapDoc.data) return;
+    const userSnapDoc = await fetchDocument<IUser>('users', userId, res, 'User');
+    if (!userSnapDoc.success || !userSnapDoc.data) return;
 
-  const userDoc = userSnapDoc.data;
+    const userDoc = userSnapDoc.data;
 
-  const userResponse = {
-    id: userId,
-    avatar: userDoc.avatar,
-    email: userDoc.email,
-    name: userDoc.name,
-  };
+    const userResponse = {
+      id: userId,
+      avatar: userDoc.avatar,
+      email: userDoc.email,
+      name: userDoc.name,
+    };
 
-  return res.apiResponse(
-    {
-      status: 200,
-      message: 'User retrieved successfully',
-    },
-    userResponse,
-  );
+    return res.apiResponse(
+      {
+        status: 200,
+        message: 'User retrieved successfully',
+      },
+      userResponse,
+    );
+  } catch (error) {
+    console.error('getCurrentUser err:', error);
+    return res.apiError({
+      status: 500,
+      message: 'Internal server error',
+      error: 'Server Error',
+    });
+  }
 };
 
 export const updateUser = async (req: Request, res: Response) => {
@@ -163,6 +190,22 @@ export const updateUser = async (req: Request, res: Response) => {
         message: 'User not found',
         error: 'Not Found',
       });
+    }
+
+    if (email && email !== userData.email) {
+      const existingUserSnap = await adminDb
+        .collection('users')
+        .where('email', '==', email)
+        .limit(1)
+        .get();
+
+      if (!existingUserSnap.empty) {
+        return res.apiError({
+          status: 409,
+          message: 'Another user with this email already exists',
+          error: 'Conflict',
+        });
+      }
     }
 
     const updatedUser: Partial<IUser> = {

@@ -1,7 +1,12 @@
 import {adminDb} from '@/config/firebase';
 import type {ICoordinates, IEntry, ILocation} from '@/types';
 import * as LocationHelper from '@/utils/location.helper';
-import {fetchDocument, type FetchDocumentResult, fetchDocumentsWithQuery} from '@/utils/firestore.helper';
+import {
+  convertTimestamps,
+  fetchDocument,
+  type FetchDocumentResult,
+  fetchDocumentsWithQuery,
+} from '@/utils/firestore.helper';
 import type {Response} from 'express';
 import _ from 'lodash';
 
@@ -21,7 +26,7 @@ export const getLatestEntry = async (
     const doc = snapshot.docs[0];
     return {
       success: true,
-      data: {id: doc.id, ...doc.data()} as IEntry,
+      data: convertTimestamps<IEntry>({id: doc.id, ...doc.data()}),
       doc,
     };
   } catch (error) {
