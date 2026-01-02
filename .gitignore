@@ -21,4 +21,14 @@ config/serviceAccountKey.json
 # Lock files
 package-lock.json
 
+# Build output
+dist/
+build/
+
+# Webstorm
 .idea/
+
+# Test coverage
+coverage/
+*.lcov
+.nyc_output/

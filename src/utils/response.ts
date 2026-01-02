@@ -4,7 +4,7 @@ import type {ApiResponse} from '@/types/global';
 export const sendResponse = <T = unknown>(
   res: Response,
   status: number,
-  message: string,
+  message = '',
   results: T | null = null,
   error = '',
 ): Response<ApiResponse<T>> => {
@@ -20,7 +20,7 @@ export const sendResponse = <T = unknown>(
 
 export const sendSuccess = <T = unknown>(
   res: Response,
-  message: string,
+  message = '',
   results: T,
   status = 200,
 ) => {

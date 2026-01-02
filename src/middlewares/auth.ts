@@ -11,6 +11,18 @@ interface JWTPayload {
   exp?: number;
 }
 
+export const requireAuth = (req: Request, res: Response): req is Request & { user: NonNullable<Request['user']> } => {
+  if (!req.user) {
+    res.apiError({
+      status: 401,
+      message: 'Unauthorized',
+      error: 'User not authenticated',
+    });
+    return false;
+  }
+  return true;
+};
+
 export const authenticateToken = async (
   req: Request,
   res: Response,
